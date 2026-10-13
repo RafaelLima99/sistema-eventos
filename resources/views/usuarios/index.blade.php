@@ -17,7 +17,7 @@
         <form method="GET" class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
             <div class="search-inline flex-grow-1">
                 <i class="bi bi-search"></i>
-                <input type="text" name="q" placeholder="Buscar por nome">
+                <input type="text" name="busca_nome" value="{{ request('busca_nome') }}" placeholder="Buscar por nome">
             </div>
             <button type="submit" class="btn btn-outline-primary"><i class="bi bi-search"></i>Buscar</button>
         </form>
@@ -34,121 +34,56 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><div class="u-cell"><span class="avatar" style="background:#2563eb">RL</span><b>Rafael Lima</b></div></td>
-                    <td>ferramentas@unu.com.br</td>
-                    <td><span class="badge-status bs-blue"><span class="b-dot"></span>Admin</span></td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('usuarios.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td><div class="u-cell"><span class="avatar" style="background:#0f766e">MC</span><b>Marina Costa</b></div></td>
-                    <td>marina.costa@unu.com.br</td>
-                    <td><span class="badge-status bs-slate"><span class="b-dot"></span>Operação</span></td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('usuarios.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td><div class="u-cell"><span class="avatar" style="background:#7c3aed">BA</span><b>Bruno Alves</b></div></td>
-                    <td>bruno.alves@unu.com.br</td>
-                    <td><span class="badge-status bs-slate"><span class="b-dot"></span>Operação</span></td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('usuarios.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td><div class="u-cell"><span class="avatar" style="background:#db2777">CR</span><b>Camila Rocha</b></div></td>
-                    <td>camila.rocha@unu.com.br</td>
-                    <td><span class="badge-status bs-slate"><span class="b-dot"></span>Somente leitura</span></td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('usuarios.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
+                @forelse ($usuarios as $usuario)
+                    <tr>
+                        <td>
+                            <div class="u-cell">
+                                <span class="avatar avatar-cor-{{ $usuario->id % 6 }}">{{ $usuario->iniciaisDoNome() }}</span>
+                                <b>{{ $usuario->name }}</b>
+                            </div>
+                        </td>
+                        <td>{{ $usuario->email }}</td>
+                        <td>—</td>
+                        <td class="text-end">
+                            <div class="dropdown d-inline-block">
+                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown" data-bs-config='{"popperConfig":{"strategy":"fixed"}}'>
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('usuarios.edit', $usuario) }}">
+                                            <i class="bi bi-pencil"></i>Editar
+                                        </a>
+                                    </li>
+                                    @if ($usuario->isNot(auth()->user()))
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <form method="POST" action="{{ route('usuarios.destroy', $usuario) }}" onsubmit="return confirm(@js('Deseja remover “'.$usuario->name.'”?'))">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="bi bi-trash text-danger"></i>Remover
+                                                </button>
+                                            </form>
+                                        </li>
+                                    @endif
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">Nenhum usuário encontrado.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
-    <div class="table-foot d-flex align-items-center">
-        <nav class="ms-auto" aria-label="Paginação de usuários">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true"><i class="bi bi-chevron-left"></i></a>
-                </li>
-                <li class="page-item active" aria-current="page"><a class="page-link" href="#">1</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+
+    @if ($usuarios->hasPages())
+        <div class="table-foot d-flex align-items-center">
+            {{ $usuarios->links() }}
+        </div>
+    @endif
 </div>
 @endsection

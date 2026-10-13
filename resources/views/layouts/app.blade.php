@@ -22,6 +22,20 @@
         @include('partials.topbar')
 
         <main class="content flex-grow-1">
+            @if (session('sucesso'))
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                    <i class="bi bi-check-circle"></i>{{ session('sucesso') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>
+            @endif
+
+            @if (session('erro'))
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+                    <i class="bi bi-exclamation-circle"></i>{{ session('erro') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                </div>
+            @endif
+
             @yield('content')
         </main>
     </div>

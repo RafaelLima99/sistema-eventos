@@ -17,20 +17,28 @@
     <div class="card">
         <div class="card-head"><h3>Dados do usuário</h3></div>
         <div class="card-pad pb-5">
-            <form method="POST" id="fEditarUsuario">
+            <form method="POST" action="{{ route('usuarios.update', $usuario) }}" id="fEditarUsuario">
                 @csrf
+                @method('PUT')
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Nome completo</label>
-                        <input class="form-control" value="Marina Costa">
+                        <input name="name" value="{{ old('name', $usuario->name) }}" class="form-control @error('name') is-invalid @enderror" required>
+                        @error('name')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">E-mail</label>
                         <div class="input-icon">
                             <i class="bi bi-envelope"></i>
-                            <input type="email" class="form-control" value="marina.costa@unu.com.br">
+                            <input type="email" name="email" value="{{ old('email', $usuario->email) }}" class="form-control @error('email') is-invalid @enderror" required>
                         </div>
+                        @error('email')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
                     </div>
+                    {{-- Papel: será implementado futuramente.
                     <div class="col-md-6">
                         <label class="form-label">Papel</label>
                         <select class="form-select">
@@ -39,12 +47,16 @@
                             <option>Admin</option>
                         </select>
                     </div>
+                    --}}
                     <div class="col-md-6">
                         <label class="form-label">Nova senha</label>
                         <div class="input-icon">
                             <i class="bi bi-lock"></i>
-                            <input type="password" class="form-control" placeholder="Deixe em branco para manter a atual" autocomplete="new-password">
+                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Deixe em branco para manter a atual" autocomplete="new-password">
                         </div>
+                        @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
             </form>
