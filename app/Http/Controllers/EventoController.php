@@ -12,6 +12,7 @@ class EventoController extends Controller
     public function index()
     {
         //
+        
     }
 
     /**

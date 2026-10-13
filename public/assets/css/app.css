@@ -270,6 +270,19 @@ table.data td .strong { font-weight:600; color:var(--ink); }
 .avatar.lg { width:52px; height:52px; border-radius:13px; font-size:17px; }
 .avatar.xl { width:76px; height:76px; border-radius:18px; font-size:26px; }
 
+/*
+ * Cores de fundo do avatar. A view escolhe a classe pelo resto da divisão
+ * do ID do usuário pela quantidade de cores (id % 6), então as cores se
+ * repetem em ciclo e cada usuário mantém sempre a mesma cor.
+ * Ao adicionar ou remover cores aqui, ajuste também o "% 6" nas views.
+ */
+.avatar-cor-0 { background:#2563eb; }
+.avatar-cor-1 { background:#0f766e; }
+.avatar-cor-2 { background:#7c3aed; }
+.avatar-cor-3 { background:#db2777; }
+.avatar-cor-4 { background:#ea580c; }
+.avatar-cor-5 { background:#0891b2; }
+
 /* Toolbar / filters */
 .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:14px 16px; border-bottom:1px solid var(--line-soft); }
 .search-inline { position:relative; }

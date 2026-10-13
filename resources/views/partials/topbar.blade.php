@@ -4,15 +4,20 @@
     <a class="icon-btn position-relative d-grid" href="#" title="Notificações"><i class="bi bi-bell"></i><span class="dot position-absolute"></span></a>
     <div class="dropdown">
         <div class="user d-flex align-items-center ms-1 ps-3 pe-0" data-bs-toggle="dropdown">
-            <div class="av d-grid">RL</div>
-            <div class="who"><b>Rafael Lima</b><small>Admin</small></div>
+            <div class="av d-grid">{{ auth()->user()->iniciaisDoNome() }}</div>
+            <div class="who"><b>{{ auth()->user()->name }}</b><small>Admin</small></div>
             <i class="bi bi-chevron-down text-muted2" style="font-size:12px"></i>
         </div>
         <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item py-2" href="{{ route('configuracoes.index') }}"><i class="bi bi-person me-2"></i>Meu perfil</a></li>
             <li><a class="dropdown-item py-2" href="{{ route('configuracoes.index') }}"><i class="bi bi-gear me-2"></i>Configurações</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item py-2" href="{{ route('login') }}"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+            <li>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="dropdown-item py-2"><i class="bi bi-box-arrow-right me-2"></i>Sair</button>
+                </form>
+            </li>
         </ul>
     </div>
 </header>
