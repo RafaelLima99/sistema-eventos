@@ -82,7 +82,7 @@
                         <select name="uf" class="form-select @error('uf') is-invalid @enderror">
                             <option value="">UF</option>
                             @foreach (App\Enums\Uf::cases() as $uf)
-                                <option value="{{ $uf->value }}" @selected(old('uf', 'SP') === $uf->value)>{{ $uf->value }}</option>
+                                <option value="{{ $uf->value }}" @selected(old('uf', 'PE') === $uf->value)>{{ $uf->value }}</option>
                             @endforeach
                         </select>
                         @error('uf')
