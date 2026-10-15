@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -26,8 +27,7 @@ Route::middleware('auth')->group(function () {
     Route::view('/inscritos/{id}', 'inscritos.show')->name('inscritos.show');
 
     // Contatos
-    Route::view('/contatos', 'contatos.index')->name('contatos.index');
-    Route::view('/contatos/{id}', 'contatos.show')->name('contatos.show');
+    Route::resource('contatos', ContatoController::class)->only(['index', 'store', 'show']);
 
     // Automações (gatilhos)
     Route::view('/automacoes', 'automacoes.index')->name('automacoes.index');

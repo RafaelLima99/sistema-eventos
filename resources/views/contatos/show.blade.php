@@ -5,7 +5,7 @@
 @section('content')
 <div class="page-title d-flex align-items-start gap-3 flex-wrap">
     <div>
-        <h2 class="mb-0">Ana Silva</h2>
+        <h2 class="mb-0">{{ $contato->nome }}</h2>
     </div>
     <div class="actions ms-auto d-flex flex-wrap">
         <a href="{{ route('contatos.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i>Voltar para Contatos</a>
@@ -20,16 +20,17 @@
         </div>
         <div class="card-pad">
             <dl class="kv">
-                <dt>E-mail</dt><dd>ana.silva@gmail.com</dd>
-                <dt>Telefone</dt><dd>(11) 99012-3145</dd>
-                <dt>CPF</dt><dd class="mono">312.048.271-11</dd>
-                <dt>Cargo</dt><dd>CEO</dd>
-                <dt>Negócio</dt><dd>Agência</dd>
-                <dt>Cadastrado em</dt><dd>02/09/2026</dd>
+                <dt>E-mail</dt><dd>{{ $contato->email ?? '—' }}</dd>
+                <dt>Telefone</dt><dd>{{ $contato->telefone ?? '—' }}</dd>
+                <dt>CPF</dt><dd class="mono">{{ $contato->cpfFormatado() ?? '—' }}</dd>
+                <dt>Cargo</dt><dd>{{ $contato->cargo ?? '—' }}</dd>
+                <dt>Negócio</dt><dd>{{ $contato->negocio ?? '—' }}</dd>
+                <dt>Cadastrado em</dt><dd>{{ $contato->created_at->format('d/m/Y') }}</dd>
             </dl>
         </div>
     </div>
 
+    {{-- Eventos vinculados: será implementado junto com o CRUD de inscritos.
     <div class="card">
         <div class="card-head">
             <h3>Eventos vinculados</h3>
@@ -58,6 +59,7 @@
             </table>
         </div>
     </div>
+    --}}
 
 </div>
 @endsection
