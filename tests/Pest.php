@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,4 +48,15 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * Cria um usuário e faz login com ele no teste atual.
+ */
+function criarUsuarioLogado(): User
+{
+    $usuario = User::factory()->create();
+    test()->actingAs($usuario);
+
+    return $usuario;
 }

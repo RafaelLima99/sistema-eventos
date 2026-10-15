@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\EventoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,10 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::view('/configuracoes', 'configuracoes.index')->name('configuracoes.index');
 
     // Eventos
-    Route::view('/eventos', 'eventos.index')->name('eventos.index');
-    Route::view('/eventos/create', 'eventos.create')->name('eventos.create');
-    Route::view('/eventos/{id}', 'eventos.show')->name('eventos.show');
-    Route::view('/eventos/{id}/edit', 'eventos.edit')->name('eventos.edit');
+    Route::resource('eventos', EventoController::class);
 
     // Inscritos (inscritos.show: view ainda não existe no protótipo)
     Route::view('/inscritos', 'inscritos.index')->name('inscritos.index');
