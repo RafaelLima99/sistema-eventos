@@ -65,7 +65,7 @@ class UserController extends Controller
         $dados = $request->validated();
 
         if (blank($dados['password'] ?? null)) {
-            //remove o campo password do array
+            // remove o campo password do array
             unset($dados['password']);
         }
 

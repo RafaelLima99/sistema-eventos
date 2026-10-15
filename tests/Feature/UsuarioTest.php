@@ -4,8 +4,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 beforeEach(function () {
-    $this->logado = User::factory()->create();
-    $this->actingAs($this->logado);
+    $this->logado = criarUsuarioLogado();
 });
 
 test('lista os usuários', function () {
