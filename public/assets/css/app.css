@@ -354,6 +354,8 @@ table.data td .strong { font-weight:600; color:var(--ink); }
 .form-label { font-size:12.5px; font-weight:600; color:var(--slate-tx); margin-bottom:6px; }
 .form-control,.form-select { border:1px solid var(--line); border-radius:10px; font-size:13px; padding:9px 12px; color:var(--text); }
 .form-control:focus,.form-select:focus { border-color:var(--blue-500); box-shadow:0 0 0 4px var(--blue-50); }
+/* Versão pequena do campo, com a mesma altura do .btn-sm (usada na URL do webhook do evento). */
+.form-control.form-control-sm { padding:6px 10px; font-size:12px; border-radius:8px; }
 .form-hint { font-size:11.5px; color:var(--faint); margin-top:5px; }
 .input-icon { position:relative; }
 .input-icon > i { position:absolute; left:12px; top:11px; color:var(--faint); }

@@ -89,6 +89,14 @@ test('exibe os detalhes do evento', function () {
         ->assertSee('R$ 600,00');
 });
 
+test('exibe a URL do webhook com o UUID do evento', function () {
+    $evento = Evento::factory()->create();
+
+    $this->get(route('eventos.show', $evento))
+        ->assertOk()
+        ->assertSee(url("/webhooks/eventos/{$evento->uuid}"));
+});
+
 test('exibe as horas do evento sem os segundos', function () {
     $evento = Evento::factory()->create(['hora_inicio' => '09:00:00', 'hora_fim' => '18:30:00']);
 
