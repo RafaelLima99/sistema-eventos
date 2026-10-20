@@ -67,7 +67,7 @@ test('reabre o modal quando a validação falha', function () {
     $this->from(route('contatos.index'))
         ->followingRedirects()
         ->post(route('contatos.store'), dadosDoContato(['nome' => '']))
-        ->assertSee("new bootstrap.Modal(document.getElementById('mNovo')).show()", false);
+        ->assertSee("new bootstrap.Modal(document.getElementById('modalNovoContato')).show()", false);
 });
 
 test('exibe os detalhes do contato com o CPF formatado', function () {

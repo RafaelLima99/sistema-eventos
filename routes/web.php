@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ContatoController;
+use App\Http\Controllers\ContatoImportacaoController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::view('/inscritos/{id}', 'inscritos.show')->name('inscritos.show');
 
     // Contatos
+    Route::post('/contatos/importacao', [ContatoImportacaoController::class, 'store'])->name('contatos.importacao.store');
     Route::resource('contatos', ContatoController::class)->only(['index', 'store', 'show']);
 
     // Automações (gatilhos)

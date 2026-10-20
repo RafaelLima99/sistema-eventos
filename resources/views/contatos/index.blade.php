@@ -8,8 +8,8 @@
         <h2>Contatos</h2>
     </div>
     <div class="actions ms-auto d-flex flex-wrap">
-        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#mImport"><i class="bi bi-upload"></i>Importar CSV</button>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mNovo"><i class="bi bi-person-plus"></i>Novo contato</button>
+        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalImportarContatos"><i class="bi bi-upload"></i>Importar CSV</button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNovoContato"><i class="bi bi-person-plus"></i>Novo contato</button>
     </div>
 </div>
 
@@ -70,7 +70,7 @@
 </div>
 
 <!-- Modal: Novo contato -->
-<div class="modal fade" id="mNovo" tabindex="-1">
+<div class="modal fade" id="modalNovoContato" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">Novo contato</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
@@ -132,13 +132,14 @@
 </div>
 
 <!-- Modal: Importar CSV -->
-<div class="modal fade" id="mImport" tabindex="-1">
+<div class="modal fade" id="modalImportarContatos" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">Importar contatos (CSV)</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <form method="POST" enctype="multipart/form-data" id="fImportarCsv">
+                <form method="POST" action="{{ route('contatos.importacao.store') }}" enctype="multipart/form-data" id="fImportarCsv">
                     @csrf
+                    {{-- Vincular a um evento: será implementado junto com o CRUD de inscritos.
                     <div class="mb-3">
                         <label class="form-label">Vincular a um evento <span class="text-muted2 fw-normal">(opcional)</span></label>
                         <select class="form-select">
@@ -150,13 +151,17 @@
                             <option>Meetup IA para Negócios</option>
                         </select>
                     </div>
+                    --}}
                     <div class="mb-3">
                         <label class="form-label">Arquivo CSV</label>
-                        <input type="file" class="form-control" accept=".csv">
-                        <div class="form-hint">Colunas suportadas: nome, email, whatsapp, cpf, cargo, negocio, cidade</div>
+                        <input type="file" name="arquivo" class="form-control @error('arquivo', 'importacao') is-invalid @enderror" accept=".csv">
+                        @error('arquivo', 'importacao')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        <div class="form-hint">Colunas suportadas: nome, email, whatsapp, cpf, cargo, negocio</div>
                     </div>
                 </form>
-                <a href="#" class="d-inline-block" style="font-size:12.5px;margin-top:10px"><i class="bi bi-download"></i> Baixar modelo de planilha</a>
+                <a href="{{ asset('assets/modelos/contatos.csv') }}" download class="d-inline-block" style="font-size:12.5px;margin-top:10px"><i class="bi bi-download"></i> Baixar modelo de planilha</a>
                 <div class="note-box" style="margin-top:14px">
                     <i class="bi bi-info-circle flex-shrink-0"></i>
                     <span>Contatos com e-mail ou CPF já existentes são atualizados, não duplicados.</span>
@@ -175,7 +180,14 @@
     @push('scripts')
     <script>
         // Reabre o modal de novo contato para mostrar os erros de validação.
-        new bootstrap.Modal(document.getElementById('mNovo')).show();
+        new bootstrap.Modal(document.getElementById('modalNovoContato')).show();
+    </script>
+    @endpush
+@elseif ($errors->importacao->any())
+    @push('scripts')
+    <script>
+        // Reabre o modal de importação para mostrar os erros de validação.
+        new bootstrap.Modal(document.getElementById('modalImportarContatos')).show();
     </script>
     @endpush
 @endif
