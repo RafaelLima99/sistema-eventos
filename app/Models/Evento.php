@@ -43,12 +43,12 @@ class Evento extends Model
     }
 
     /**
-     * URL que a plataforma de pagamento chama para inscrever o comprador neste evento.
+     * URL que a Hotmart chama para inscrever o comprador neste evento.
      * Usa o UUID para o link não poder ser adivinhado (/eventos/1, /eventos/2...).
      */
-    public function urlWebhook(): string
+    public function urlWebhookHotmart(): string
     {
-        return url("/webhooks/eventos/{$this->uuid}");
+        return route('webhooks.hotmart', $this->uuid);
     }
 
     /**

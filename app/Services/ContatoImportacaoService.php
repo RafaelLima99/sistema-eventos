@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Contato;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -28,7 +27,10 @@ class ContatoImportacaoService
         'negocio' => 'negocio',
     ];
 
-    public function __construct(private CsvService $csvService) {}
+    public function __construct(
+        private CsvService $csvService,
+        private ContatoService $contatoService,
+    ) {}
 
     /**
      * @return array{criados: int, atualizados: int, ignoradas: list<int>}
@@ -54,16 +56,9 @@ class ContatoImportacaoService
                 continue;
             }
 
-            $contato = $this->buscarContatoExistente($dados);
+            $contato = $this->contatoService->criarOuAtualizar($dados);
 
-            if ($contato) {
-                // Só atualiza os campos preenchidos, para não apagar dados com colunas vazias.
-                $contato->update(array_filter($dados));
-                $resultado['atualizados']++;
-            } else {
-                Contato::create($dados);
-                $resultado['criados']++;
-            }
+            $contato->wasRecentlyCreated ? $resultado['criados']++ : $resultado['atualizados']++;
         }
 
         return $resultado;
@@ -115,27 +110,5 @@ class ContatoImportacaoService
             'cargo' => ['nullable', 'string', 'max:255'],
             'negocio' => ['nullable', 'string', 'max:255'],
         ])->fails();
-    }
-
-    /**
-     * Procura o contato pelo CPF e, se não achar, pelo e-mail.
-     *
-     * @param  array<string, string|null>  $dados
-     */
-    private function buscarContatoExistente(array $dados): ?Contato
-    {
-        if (filled($dados['cpf'] ?? null)) {
-            $contato = Contato::where('cpf', $dados['cpf'])->first();
-
-            if ($contato) {
-                return $contato;
-            }
-        }
-
-        if (filled($dados['email'] ?? null)) {
-            return Contato::where('email', $dados['email'])->first();
-        }
-
-        return null;
     }
 }
