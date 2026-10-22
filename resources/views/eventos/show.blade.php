@@ -44,10 +44,10 @@
         <h3>Integração com a plataforma de pagamento</h3>
     </div>
     <div class="card-pad">
-        <label class="form-label" for="urlWebhook">URL do webhook</label>
+        <label class="form-label" for="urlWebhookHotmart">URL do webhook da Hotmart</label>
         <div class="d-flex gap-2">
-            <input type="text" id="urlWebhook" class="form-control form-control-sm mono" value="{{ $evento->urlWebhook() }}" readonly>
-            <button type="button" class="btn btn-outline-secondary btn-sm text-nowrap flex-shrink-0" onclick="navigator.clipboard.writeText(document.getElementById('urlWebhook').value)"><i class="bi bi-clipboard"></i>Copiar</button>
+            <input type="text" id="urlWebhookHotmart" class="form-control form-control-sm mono" value="{{ $evento->urlWebhookHotmart() }}" readonly>
+            <button type="button" class="btn btn-outline-secondary btn-sm text-nowrap flex-shrink-0" onclick="navigator.clipboard.writeText(document.getElementById('urlWebhookHotmart').value)"><i class="bi bi-clipboard"></i>Copiar</button>
         </div>
         <div class="form-hint">Cole esta URL na plataforma de pagamento para que as compras inscrevam o contato neste evento automaticamente.</div>
     </div>

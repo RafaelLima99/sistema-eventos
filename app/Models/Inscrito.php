@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\StatusIngresso;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,6 +47,7 @@ class Inscrito extends Model
     protected function casts(): array
     {
         return [
+            'status_ingresso' => StatusIngresso::class,
             'quantidade_ingresso' => 'integer',
             'valor_pago' => 'decimal:2',
         ];
