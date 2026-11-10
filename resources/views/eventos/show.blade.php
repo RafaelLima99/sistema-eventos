@@ -41,7 +41,7 @@
 
 <div class="card mt-3">
     <div class="card-head">
-        <h3>Integração com a plataforma de pagamento</h3>
+        <h3>Integrações</h3>
     </div>
     <div class="card-pad">
         <label class="form-label" for="urlWebhookHotmart">URL do webhook da Hotmart</label>
@@ -50,6 +50,13 @@
             <button type="button" class="btn btn-outline-secondary btn-sm text-nowrap flex-shrink-0" onclick="navigator.clipboard.writeText(document.getElementById('urlWebhookHotmart').value)"><i class="bi bi-clipboard"></i>Copiar</button>
         </div>
         <div class="form-hint">Cole esta URL na plataforma de pagamento para que as compras inscrevam o contato neste evento automaticamente.</div>
+
+        <label class="form-label mt-3" for="urlWebhookGreatpages">URL do webhook da Greatpages</label>
+        <div class="d-flex gap-2">
+            <input type="text" id="urlWebhookGreatpages" class="form-control form-control-sm mono" value="{{ $evento->urlWebhookGreatpages() }}" readonly>
+            <button type="button" class="btn btn-outline-secondary btn-sm text-nowrap flex-shrink-0" onclick="navigator.clipboard.writeText(document.getElementById('urlWebhookGreatpages').value)"><i class="bi bi-clipboard"></i>Copiar</button>
+        </div>
+        <div class="form-hint">Cole esta URL no webhook do formulário da landing page e preencha o campo "Token" com o token da Greatpages.</div>
     </div>
 </div>
 @endsection

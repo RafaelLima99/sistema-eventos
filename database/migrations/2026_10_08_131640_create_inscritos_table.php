@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('status_ingresso', 20)->default('pendente');
             $table->string('status_presenca', 20)->default('pendente');
             $table->string('plataforma', 30)->nullable();
-            $table->string('tipo_ingresso', 50);
-            $table->unsignedSmallInteger('quantidade_ingresso')->default(1);
-            $table->decimal('valor_pago', 10, 2)->default(0);
+            $table->string('tipo_ingresso', 50)->nullable();
+            $table->unsignedSmallInteger('quantidade_ingresso')->nullable();
+            $table->decimal('valor_pago', 10, 2)->nullable();
             $table->string('utm_source', 255)->nullable();
             $table->string('utm_medium', 255)->nullable();
             $table->string('utm_campaign', 255)->nullable();

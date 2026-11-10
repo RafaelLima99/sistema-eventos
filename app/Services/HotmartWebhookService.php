@@ -18,23 +18,29 @@ class HotmartWebhookService
     /**
      * Cria (ou atualiza) o contato do comprador e o inscreve no evento.
      *
-     * Se o contato já está inscrito no evento, só o status do ingresso muda para "pago".
-     * Isso também evita duplicar quando a Hotmart reenvia o mesmo webhook.
+     * Se o contato já está inscrito no evento (ex.: pelo formulário da Greatpages), a inscrição
+     * é completada com os dados da compra. Isso também evita duplicar quando a Hotmart reenvia o webhook.
      *
      * @param  array<string, mixed>  $dados  conteúdo de "data" do webhook
      */
     public function registrarCompraAprovada(Evento $evento, array $dados): Inscrito
     {
-        $contato = $this->salvarContato($dados['buyer']);
+        $contato = $this->criarOuAtualizarContato($dados['buyer']);
+
+        // O tipo de ingresso não vem da Hotmart: ele é definido pelo formulário da Greatpages.
+        $dadosDaCompra = [
+            'status_ingresso' => StatusIngresso::Pago,
+            'quantidade_ingresso' => data_get($dados, 'purchase.event_tickets.amount') ?? 1,
+            'valor_pago' => data_get($dados, 'purchase.price.value'),
+        ];
 
         $inscrito = Inscrito::where('evento_id', $evento->id)
             ->where('contato_id', $contato->id)
             ->first();
 
-        // Se o contato já está inscrito no evento, só atualiza o status do ingresso para pago.
+        // Se o contato já está inscrito no evento, completa a inscrição com os dados da compra.
         if ($inscrito) {
-            
-            $inscrito->update(['status_ingresso' => StatusIngresso::Pago]);
+            $inscrito->update($dadosDaCompra);
 
             return $inscrito;
         }
@@ -42,12 +48,10 @@ class HotmartWebhookService
         return Inscrito::create([
             'evento_id' => $evento->id,
             'contato_id' => $contato->id,
-            'status_ingresso' => StatusIngresso::Pago,
             'plataforma' => 'hotmart',
-            // A Hotmart não envia o nome da oferta, só o código (ex.: "muoy99hp").
-            'tipo_ingresso' => data_get($dados, 'purchase.offer.code') ?? 'hotmart',
-            'quantidade_ingresso' => data_get($dados, 'purchase.event_tickets.amount') ?? 1,
-            'valor_pago' => data_get($dados, 'purchase.price.value'),
+            // Comprou direto pela Hotmart, sem passar pelo formulário da Greatpages.
+            'tipo_ingresso' => null,
+            ...$dadosDaCompra,
         ]);
     }
 
@@ -56,7 +60,7 @@ class HotmartWebhookService
      *
      * @param  array<string, mixed>  $comprador  conteúdo de "data.buyer" do webhook
      */
-    private function salvarContato(array $comprador): Contato
+    private function criarOuAtualizarContato(array $comprador): Contato
     {
         // CPF sem máscara: "312.048.271-11" => "31204827111".
         $cpf = preg_replace('/\D/', '', (string) ($comprador['document'] ?? '')) ?: null;
