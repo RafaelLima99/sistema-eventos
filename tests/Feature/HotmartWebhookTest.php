@@ -68,7 +68,7 @@ test('compra aprovada cria o contato e a inscrição no evento do link', functio
         ->contato_id->toBe($contato->id)
         ->status_ingresso->toBe(StatusIngresso::Pago)
         ->plataforma->toBe('hotmart')
-        ->tipo_ingresso->toBe('oferta01')
+        ->tipo_ingresso->toBeNull()
         ->quantidade_ingresso->toBe(2)
         ->valor_pago->toBe('35.00');
 });
@@ -82,15 +82,14 @@ test('usa o contato que já existe com o mesmo CPF', function () {
         ->and(Inscrito::firstOrFail()->contato_id)->toBe($contato->id);
 });
 
-test('contato já inscrito só tem o status do ingresso atualizado para pago', function () {
+test('completa com os dados da compra a inscrição pendente que veio da Greatpages', function () {
     $contato = Contato::factory()->create(['cpf' => '31204827111']);
     $inscrito = Inscrito::create([
         'evento_id' => $this->evento->id,
         'contato_id' => $contato->id,
         'status_ingresso' => StatusIngresso::Pendente,
-        'tipo_ingresso' => 'Inteira',
-        'quantidade_ingresso' => 1,
-        'valor_pago' => 0,
+        'plataforma' => 'hotmart',
+        'tipo_ingresso' => 'Social',
     ]);
 
     enviarWebhook($this->evento, webhookHotmart())->assertOk();
@@ -98,9 +97,9 @@ test('contato já inscrito só tem o status do ingresso atualizado para pago', f
     expect(Inscrito::count())->toBe(1)
         ->and($inscrito->refresh())
         ->status_ingresso->toBe(StatusIngresso::Pago)
-        ->tipo_ingresso->toBe('Inteira')
-        ->quantidade_ingresso->toBe(1)
-        ->valor_pago->toBe('0.00');
+        ->tipo_ingresso->toBe('Social')
+        ->quantidade_ingresso->toBe(2)
+        ->valor_pago->toBe('35.00');
 });
 
 test('não duplica a inscrição quando a Hotmart reenvia o mesmo webhook', function () {
@@ -120,7 +119,15 @@ test('recusa a chamada com hottok errado', function () {
 test('recusa a chamada quando o hottok não está configurado', function () {
     config(['services.hotmart.hottok' => null]);
 
-    enviarWebhook($this->evento, webhookHotmart(), '')->assertForbidden();
+    enviarWebhook($this->evento, webhookHotmart(), 'qualquer-token')->assertForbidden();
+});
+
+test('recusa a chamada sem hottok com mensagem própria', function () {
+    enviarWebhook($this->evento, webhookHotmart(), '')
+        ->assertUnauthorized()
+        ->assertJson(['message' => 'Token não informado no header X-HOTMART-HOTTOK.']);
+
+    expect(Inscrito::count())->toBe(0);
 });
 
 test('responde 404 para um evento que não existe', function () {

@@ -52,6 +52,14 @@ class Evento extends Model
     }
 
     /**
+     * URL que a Greatpages chama quando o formulário da landing page é enviado.
+     */
+    public function urlWebhookGreatpages(): string
+    {
+        return route('webhooks.greatpages', $this->uuid);
+    }
+
+    /**
      * @return HasMany<Inscrito, $this>
      */
     public function inscritos(): HasMany

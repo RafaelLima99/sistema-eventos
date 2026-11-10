@@ -33,6 +33,11 @@ return [
         'hottok' => env('HOTMART_HOTTOK'),
     ],
 
+    'greatpages' => [
+        // Token enviado pela Greatpages no header Authorization (campo "Token" na configuração do webhook).
+        'token' => env('GREATPAGES_TOKEN'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
