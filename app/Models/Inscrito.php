@@ -3,7 +3,10 @@
 namespace App\Models;
 
 use App\Enums\StatusIngresso;
+use App\Enums\StatusPresenca;
+use Database\Factories\InscritoFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -23,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class Inscrito extends Model
 {
+    /** @use HasFactory<InscritoFactory> */
+    use HasFactory;
+
     /**
      * @return BelongsTo<Evento, $this>
      */
@@ -48,6 +54,7 @@ class Inscrito extends Model
     {
         return [
             'status_ingresso' => StatusIngresso::class,
+            'status_presenca' => StatusPresenca::class,
             'quantidade_ingresso' => 'integer',
             'valor_pago' => 'decimal:2',
         ];

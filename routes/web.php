@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\ContatoImportacaoController;
 use App\Http\Controllers\EventoController;
+use App\Http\Controllers\InscritoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,9 +24,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('eventos', EventoController::class);
 
     // Inscritos (inscritos.show: view ainda não existe no protótipo)
-    Route::view('/inscritos', 'inscritos.index')->name('inscritos.index');
+    Route::get('/inscritos', [InscritoController::class, 'index'])->name('inscritos.index');
     Route::view('/inscritos/create', 'inscritos.create')->name('inscritos.create');
     Route::view('/inscritos/{id}', 'inscritos.show')->name('inscritos.show');
+    Route::delete('/inscritos/{inscrito}', [InscritoController::class, 'destroy'])->name('inscritos.destroy');
 
     // Contatos
     Route::post('/contatos/importacao', [ContatoImportacaoController::class, 'store'])->name('contatos.importacao.store');
