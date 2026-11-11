@@ -8,7 +8,7 @@
         <h2>Inscritos</h2>
     </div>
     <div class="actions ms-auto d-flex flex-wrap">
-        <a href="#" class="btn btn-outline-secondary"><i class="bi bi-filetype-csv"></i>Exportar CSV</a>
+        <a href="{{ route('inscritos.exportacao.index', request()->except('page')) }}" class="btn btn-outline-secondary"><i class="bi bi-filetype-csv"></i>Exportar CSV</a>
         <a href="{{ route('inscritos.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i>Adicionar inscrito</a>
     </div>
 </div>

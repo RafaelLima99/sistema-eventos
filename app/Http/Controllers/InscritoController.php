@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Evento;
 use App\Models\Inscrito;
+use App\Services\InscritoBuscaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,36 +14,9 @@ class InscritoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request, InscritoBuscaService $inscritoBuscaService): View
     {
-        // with() busca os contatos e eventos de todos os inscritos de uma vez, em vez de uma consulta por linha.
-        $query = Inscrito::query()->with(['contato', 'evento']);
-
-        if ($request->filled('busca_nome')) {
-            // O nome está na tabela contatos: whereHas filtra os inscritos pelo contato, e a função diz como filtrar o contato.
-            $query->whereHas('contato', function ($contato) use ($request) {
-                $contato->whereLike('nome', '%'.$request->string('busca_nome').'%');
-            });
-        }
-
-        if ($request->filled('evento')) {
-            $query->where('evento_id', $request->integer('evento'));
-        }
-
-        if ($request->filled('cpf')) {
-            // O CPF é salvo sem máscara: "312.048.271-11" vira "31204827111" para achar o contato.
-            $cpf = preg_replace('/\D/', '', $request->string('cpf'));
-            // O CPF está na tabela contatos: filtra os inscritos cujo contato tem esse CPF.
-            $query->whereHas('contato', fn ($contato) => $contato->where('cpf', $cpf));
-        }
-
-        if ($request->filled('status_ingresso')) {
-            $query->where('status_ingresso', $request->string('status_ingresso'));
-        }
-
-        if ($request->filled('status_presenca')) {
-            $query->where('status_presenca', $request->string('status_presenca'));
-        }
+        $query = $inscritoBuscaService->buscar($request);
 
         $inscritos = $query->orderByDesc('id')
             ->paginate(15)
