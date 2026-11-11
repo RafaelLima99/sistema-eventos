@@ -161,7 +161,7 @@
                             <label class="form-label">CPF</label>
                             <div class="input-icon">
                                 <i class="bi bi-person-vcard"></i>
-                                <input type="text" class="form-control" name="cpf" id="filtroCpf" value="{{ request('cpf') }}" placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
+                                <input type="text" class="form-control" name="cpf" data-mascara-cpf value="{{ request('cpf') }}" placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
                             </div>
                         </div>
                         <div class="col-12">
@@ -195,20 +195,5 @@
 @endsection
 
 @push('scripts')
-<script>
-    // Máscara do CPF na busca detalhada: "31204827111" vira "312.048.271-11" enquanto digita.
-    const campoCpf = document.getElementById('filtroCpf');
-
-    function aplicarMascaraCpf() {
-        const digitos = campoCpf.value.replace(/\D/g, '').slice(0, 11);
-
-        campoCpf.value = digitos
-            .replace(/^(\d{3})(\d)/, '$1.$2')
-            .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-            .replace(/\.(\d{3})(\d)/, '.$1-$2');
-    }
-
-    campoCpf.addEventListener('input', aplicarMascaraCpf);
-    aplicarMascaraCpf();
-</script>
+<script src="{{ asset('assets/js/mascara-cpf.js') }}"></script>
 @endpush
