@@ -5,6 +5,7 @@ use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\ContatoImportacaoController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\InscritoController;
+use App\Http\Controllers\InscritoExportacaoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,7 @@ Route::middleware('auth')->group(function () {
 
     // Inscritos (inscritos.show: view ainda não existe no protótipo)
     Route::get('/inscritos', [InscritoController::class, 'index'])->name('inscritos.index');
+    Route::get('/inscritos/exportacao', [InscritoExportacaoController::class, 'index'])->name('inscritos.exportacao.index');
     Route::view('/inscritos/create', 'inscritos.create')->name('inscritos.create');
     Route::view('/inscritos/{id}', 'inscritos.show')->name('inscritos.show');
     Route::delete('/inscritos/{inscrito}', [InscritoController::class, 'destroy'])->name('inscritos.destroy');
