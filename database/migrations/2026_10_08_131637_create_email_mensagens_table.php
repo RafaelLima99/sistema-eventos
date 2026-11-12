@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('titulo', 255);
             $table->string('assunto', 255);
             $table->longText('conteudo');
-            $table->json('variaveis')->nullable();
             $table->timestamps();
         });
     }

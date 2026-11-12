@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\ContatoImportacaoController;
+use App\Http\Controllers\EmailMensagemController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\InscritoController;
 use App\Http\Controllers\InscritoExportacaoController;
@@ -49,10 +50,9 @@ Route::middleware('auth')->group(function () {
     Route::view('/whatsapp-mensagens/{id}', 'whatsapp-mensagens.show')->name('whatsapp-mensagens.show');
     Route::view('/whatsapp-mensagens/{id}/edit', 'whatsapp-mensagens.edit')->name('whatsapp-mensagens.edit');
 
-    Route::view('/email-mensagens', 'email-mensagens.index')->name('email-mensagens.index');
-    Route::view('/email-mensagens/create', 'email-mensagens.create')->name('email-mensagens.create');
-    Route::view('/email-mensagens/{id}', 'email-mensagens.show')->name('email-mensagens.show');
-    Route::view('/email-mensagens/{id}/edit', 'email-mensagens.edit')->name('email-mensagens.edit');
+    // parameters(): nome do parâmetro da rota, igual ao do controller ($emailMensagem), para o Laravel achar o model sozinho.
+    Route::resource('email-mensagens', EmailMensagemController::class)
+        ->parameters(['email-mensagens' => 'emailMensagem']);
 
     // Disparos
     Route::view('/disparos', 'disparos.index')->name('disparos.index');
