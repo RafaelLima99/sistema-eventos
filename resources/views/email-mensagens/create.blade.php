@@ -14,36 +14,40 @@
 
 <div class="card mb-4">
     <div class="card-pad">
-        <form method="POST" id="fNovaMensagemEmail">
+        <form method="POST" action="{{ route('email-mensagens.store') }}" id="fNovaMensagemEmail">
             @csrf
             <div class="row g-3">
 
                 <div>
                     <label class="form-label">Nome no sistema</label>
-                    <input class="form-control" placeholder="Ex.: Confirmação de inscrição · E-mail">
+                    <input name="titulo" value="{{ old('titulo') }}" class="form-control @error('titulo') is-invalid @enderror" placeholder="Ex.: Confirmação de inscrição · E-mail">
+                    @error('titulo')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div>
                     <label class="form-label">Assunto</label>
-                    <input class="form-control" placeholder="Ex.: Inscrição confirmada — @{{evento}}">
+                    <input name="assunto" value="{{ old('assunto') }}" class="form-control @error('assunto') is-invalid @enderror" placeholder="Ex.: Inscrição confirmada — @{{evento}}">
+                    @error('assunto')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div>
                     <label class="form-label">Conteúdo</label>
-                    <textarea class="form-control" rows="7" placeholder="Olá @{{nome}},&#10;&#10;Sua inscrição no @{{evento}} foi confirmada..."></textarea>
+                    <textarea name="conteudo" rows="7" class="form-control @error('conteudo') is-invalid @enderror" placeholder="Olá @{{nome}},&#10;&#10;Sua inscrição no @{{evento}} foi confirmada...">{{ old('conteudo') }}</textarea>
+                    @error('conteudo')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div>
                     <label class="form-label">Variáveis disponíveis <span class="text-muted2 fw-normal">(clique para inserir)</span></label>
                     <div>
-                        <span class="var-token">@{{nome}}</span>
-                        <span class="var-token">@{{evento}}</span>
-                        <span class="var-token">@{{data}}</span>
-                        <span class="var-token">@{{horario}}</span>
-                        <span class="var-token">@{{localidade}}</span>
-                        <span class="var-token">@{{link}}</span>
-                        <span class="var-token">@{{responsavel}}</span>
-                        <span class="var-token">@{{tipo_ingresso}}</span>
+                        @foreach ($variaveisDisponiveis as $variavel)
+                            <span class="var-token">{{ $variavel }}</span>
+                        @endforeach
                     </div>
                 </div>
 
@@ -57,3 +61,7 @@
     <button type="submit" form="fNovaMensagemEmail" class="btn btn-primary"><i class="bi bi-check-lg"></i>Criar mensagem</button>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/js/inserir-variavel.js') }}"></script>
+@endpush
