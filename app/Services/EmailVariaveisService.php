@@ -18,7 +18,8 @@ class EmailVariaveisService
         '{{data}}',
         '{{horario}}',
         '{{localidade}}',
-        '{{link}}',
+        '{{link_inscricao}}',
+        '{{link_pagamento}}',
         '{{responsavel}}',
         '{{tipo_ingresso}}',
     ];

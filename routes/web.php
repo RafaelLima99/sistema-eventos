@@ -9,6 +9,7 @@ use App\Http\Controllers\InscritoController;
 use App\Http\Controllers\InscritoExportacaoController;
 use App\Http\Controllers\PresencaController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WhatsappMensagemController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -45,10 +46,9 @@ Route::middleware('auth')->group(function () {
     Route::view('/automacoes/{id}/edit', 'automacoes.edit')->name('automacoes.edit');
 
     // Mensagens
-    Route::view('/whatsapp-mensagens', 'whatsapp-mensagens.index')->name('whatsapp-mensagens.index');
-    Route::view('/whatsapp-mensagens/create', 'whatsapp-mensagens.create')->name('whatsapp-mensagens.create');
-    Route::view('/whatsapp-mensagens/{id}', 'whatsapp-mensagens.show')->name('whatsapp-mensagens.show');
-    Route::view('/whatsapp-mensagens/{id}/edit', 'whatsapp-mensagens.edit')->name('whatsapp-mensagens.edit');
+    // parameters(): nome do parâmetro da rota, igual ao do controller ($whatsappMensagem), para o Laravel achar o model sozinho.
+    Route::resource('whatsapp-mensagens', WhatsappMensagemController::class)
+        ->parameters(['whatsapp-mensagens' => 'whatsappMensagem']);
 
     // parameters(): nome do parâmetro da rota, igual ao do controller ($emailMensagem), para o Laravel achar o model sozinho.
     Route::resource('email-mensagens', EmailMensagemController::class)
