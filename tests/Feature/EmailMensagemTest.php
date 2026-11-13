@@ -83,7 +83,7 @@ test('não cria a mensagem sem os campos obrigatórios', function () {
 });
 
 test('recusa variáveis que o sistema não conhece', function () {
-    $this->post(route('email-mensagens.store'), dadosDaMensagemDeEmail(['conteudo' => 'Olá {{nom}}, veja {{link}}']))
+    $this->post(route('email-mensagens.store'), dadosDaMensagemDeEmail(['conteudo' => 'Olá {{nom}}, veja {{link_pagamento}}']))
         ->assertSessionHasErrors(['conteudo' => 'Variáveis desconhecidas: {{nom}}.']);
 
     expect(EmailMensagem::count())->toBe(0);
