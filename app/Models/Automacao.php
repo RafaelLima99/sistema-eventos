@@ -2,8 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\CanalMensagem;
+use App\Enums\FiltroPublico;
+use App\Enums\StatusAutomacao;
+use Database\Factories\AutomacaoFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class Automacao extends Model
 {
+    /** @use HasFactory<AutomacaoFactory> */
+    use HasFactory;
+
     /**
      * @return BelongsTo<Evento, $this>
      */
@@ -46,6 +54,14 @@ class Automacao extends Model
     }
 
     /**
+     * Traz só uma das duas mensagens: verifica se o canal é WhatsApp ou e-mail e devolve a mensagem desse canal.
+     */
+    public function mensagem(): WhatsappMensagem|EmailMensagem|null
+    {
+        return $this->canal === CanalMensagem::Whatsapp ? $this->whatsappMensagem : $this->emailMensagem;
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -53,7 +69,10 @@ class Automacao extends Model
     protected function casts(): array
     {
         return [
+            'canal' => CanalMensagem::class,
             'minutos_disparo' => 'integer',
+            'filtro' => FiltroPublico::class,
+            'status' => StatusAutomacao::class,
         ];
     }
 }

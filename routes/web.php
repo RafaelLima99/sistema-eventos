@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\AutomacaoController;
 use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\ContatoImportacaoController;
 use App\Http\Controllers\EmailMensagemController;
@@ -41,9 +42,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('contatos', ContatoController::class)->only(['index', 'store', 'show']);
 
     // Automações (gatilhos)
-    Route::view('/automacoes', 'automacoes.index')->name('automacoes.index');
-    Route::view('/automacoes/create', 'automacoes.create')->name('automacoes.create');
-    Route::view('/automacoes/{id}/edit', 'automacoes.edit')->name('automacoes.edit');
+    // parameters(): nome do parâmetro da rota, igual ao do controller ($automacao), para o Laravel achar o model sozinho.
+    Route::resource('automacoes', AutomacaoController::class)
+        ->except('show')
+        ->parameters(['automacoes' => 'automacao']);
 
     // Mensagens
     // parameters(): nome do parâmetro da rota, igual ao do controller ($whatsappMensagem), para o Laravel achar o model sozinho.
