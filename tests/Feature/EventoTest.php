@@ -52,6 +52,18 @@ test('busca eventos pelo nome', function () {
         ->assertDontSee('Workshop de Vendas');
 });
 
+test('depois de criar o evento, vai para as automações já filtradas por ele', function () {
+    $resposta = $this->post(route('eventos.store'), dadosDoEvento());
+
+    $evento = Evento::where('titulo', 'Summit de Marketing Digital')->firstOrFail();
+
+    $resposta->assertRedirect(route('automacoes.index', ['evento' => $evento->id]))
+        ->assertSessionHas('sucesso', 'Evento criado.');
+
+    $this->get(route('automacoes.index', ['evento' => $evento->id]))
+        ->assertSee('<option value="'.$evento->id.'" selected>Summit de Marketing Digital</option>', false);
+});
+
 test('cria um evento como publicado', function () {
     $this->post(route('eventos.store'), dadosDoEvento())
         ->assertSessionHasNoErrors();

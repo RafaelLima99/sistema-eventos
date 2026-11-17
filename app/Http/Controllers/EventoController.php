@@ -44,12 +44,13 @@ class EventoController extends Controller
      */
     public function store(StoreEventoRequest $request): RedirectResponse
     {
-        Evento::create([
+        $evento = Evento::create([
             ...$request->validated(),
             'status' => StatusEvento::Publicado,
         ]);
 
-        return redirect()->route('eventos.index')->with('sucesso', 'Evento criado.');
+        // Vai direto para as automações do evento novo, já filtradas por ele, para cadastrar os gatilhos em seguida.
+        return redirect()->route('automacoes.index', ['evento' => $evento->id])->with('sucesso', 'Evento criado.');
     }
 
     /**
