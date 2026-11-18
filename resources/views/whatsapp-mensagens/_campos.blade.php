@@ -3,7 +3,8 @@
     // Template que já vem marcado ao abrir a página: o que a pessoa tinha escolhido antes de um erro de validação
     // (o formulário volta com a escolha mantida) ou, na edição, o que já estava salvo. Só vale na hora de montar a página.
     $templateEscolhido = old('nome_template_meta', $whatsappMensagem->nome_template_meta ?? null);
-    $maximoDeVariaveis = max(array_column($templates, 'total_variaveis'));
+    // O 0 evita erro do max() quando a lista de templates vem vazia.
+    $maximoDeVariaveis = max([0, ...array_column($templates, 'total_variaveis')]);
 @endphp
 
 <div class="row g-3">
@@ -44,6 +45,9 @@
                 </label>
             @endforeach
         </div>
+        @if ($templates === [])
+            <div class="form-hint">Nenhum template aprovado encontrado na Meta. Confira se há templates aprovados no WhatsApp Manager e as credenciais do WhatsApp no .env.</div>
+        @endif
         @error('nome_template_meta')
             <div class="invalid-feedback d-block">{{ $message }}</div>
         @enderror

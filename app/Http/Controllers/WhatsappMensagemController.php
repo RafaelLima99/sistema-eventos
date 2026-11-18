@@ -30,7 +30,7 @@ class WhatsappMensagemController extends Controller
 
         return view('whatsapp-mensagens.index', [
             'whatsappMensagens' => $whatsappMensagens,
-            'templates' => $whatsappTemplateService->listar(),
+            'templates' => $whatsappTemplateService->listarAprovados(),
         ]);
     }
 
@@ -59,8 +59,8 @@ class WhatsappMensagemController extends Controller
     {
         return view('whatsapp-mensagens.show', [
             'whatsappMensagem' => $whatsappMensagem,
-            // Pode ser null se o template deixou de existir na Meta.
-            'template' => $whatsappTemplateService->buscar($whatsappMensagem->nome_template_meta),
+            // Pode ser null se o template não está mais aprovado na Meta (pausado, desativado ou removido).
+            'template' => $whatsappTemplateService->buscarAprovadoPorNome($whatsappMensagem->nome_template_meta),
         ]);
     }
 

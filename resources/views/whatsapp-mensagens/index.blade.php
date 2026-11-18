@@ -43,14 +43,15 @@
             </thead>
             <tbody>
                 @forelse ($whatsappMensagens as $whatsappMensagem)
-                    @php($status = $templates[$whatsappMensagem->nome_template_meta]['status'] ?? null)
+                    {{-- $templates só tem os aprovados: se o template da mensagem não está lá, ela não pode ser enviada. --}}
+                    @php($estaAprovado = isset($templates[$whatsappMensagem->nome_template_meta]))
                     <tr>
                         <td><a href="{{ route('whatsapp-mensagens.show', $whatsappMensagem) }}" class="strong">{{ $whatsappMensagem->titulo }}</a></td>
                         <td>
-                            @if ($status)
-                                <span class="badge-status {{ $status->badgeClass() }}"><span class="b-dot"></span>{{ $status->label() }}</span>
+                            @if ($estaAprovado)
+                                <span class="badge-status bs-green"><span class="b-dot"></span>Aprovado</span>
                             @else
-                                <span class="muted">—</span>
+                                <span class="badge-status bs-slate"><span class="b-dot"></span>Indisponível</span>
                             @endif
                         </td>
                         <td class="text-end">
