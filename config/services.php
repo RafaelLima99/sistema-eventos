@@ -38,6 +38,14 @@ return [
         'token' => env('GREATPAGES_TOKEN'),
     ],
 
+    'whatsapp' => [
+        // API oficial do WhatsApp (Cloud API), usada para listar os templates aprovados.
+        // Token e ID da conta ficam no Meta for Developers > seu app > WhatsApp > Configuração da API.
+        'token' => env('WHATSAPP_TOKEN'),
+        'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
+        'versao' => env('WHATSAPP_API_VERSION', 'v24.0'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

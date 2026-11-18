@@ -2,56 +2,122 @@
 
 namespace App\Services;
 
-use App\Enums\StatusTemplateMeta;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 
 /**
- * Templates de WhatsApp cadastrados na Meta (WhatsApp Manager).
+ * Templates de WhatsApp aprovados pela Meta (WhatsApp Manager), buscados pela API oficial (WhatsApp Cloud API).
+ * Só templates aprovados podem ser enviados, por isso o sistema nem busca os outros.
  *
- * Ainda não há integração com a Meta: os templates abaixo são fictícios.
- * Quando a integração existir, só este service muda (listar e buscar passam a consultar a API da Meta),
- * e o resto do sistema continua chamando os mesmos métodos.
+ * Credenciais no .env: WHATSAPP_TOKEN e WHATSAPP_BUSINESS_ACCOUNT_ID (ver config/services.php).
  */
 class WhatsappTemplateService
 {
     /**
-     * Todos os templates, na ordem em que aparecem na tela, indexados pelo nome do template.
+     * Por quanto tempo (em segundos) a lista da Meta fica guardada antes de buscar de novo.
+     * Evita chamar a Meta a cada página aberta. Template aprovado agora aparece em até 5 minutos.
+     */
+    private const SEGUNDOS_EM_CACHE = 300;
+
+    /**
+     * Templates aprovados da conta, indexados pelo nome do template.
      *
-     * Cada template tem: nome, categoria, categoria_classe, idioma, status (StatusTemplateMeta), qualidade,
+     * Cada template tem: nome, categoria, categoria_classe, idioma, qualidade,
      * id, corpo (texto com {{1}}, {{2}}…) e total_variaveis.
+     * Se a Meta não responder, devolve lista vazia (e registra o erro no log).
      *
      * @return array<string, array<string, mixed>>
      */
-    public function listar(): array
+    public function listarAprovados(): array
     {
+        try {
+            // Guarda a lista por até 5 minutos com o nome "whatsapp_templates" (tabela cache do banco).
+            // Se já está guardada, devolve sem chamar a Meta. Se expirou, chama buscarNaMeta() e guarda de novo.
+            // Por isso, um template aprovado agora na Meta pode levar até 5 minutos para aparecer no sistema.
+            return Cache::remember('whatsapp_templates', self::SEGUNDOS_EM_CACHE, fn () => $this->buscarNaMeta());
+        } catch (ConnectionException|RequestException $erro) {
+            report($erro);
+
+            return [];
+        }
+    }
+
+    /**
+     * @return array<string, mixed>|null o template, ou null se não estiver aprovado (ou não existir) na Meta
+     */
+    public function buscarAprovadoPorNome(?string $nome): ?array
+    {
+        return $this->listarAprovados()[$nome] ?? null;
+    }
+
+    /**
+     * Chama a API da Meta e converte cada template para o formato usado no sistema.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function buscarNaMeta(): array
+    {
+        $versao = config('services.whatsapp.versao');
+        $contaId = config('services.whatsapp.business_account_id');
+
+        $url = "https://graph.facebook.com/{$versao}/{$contaId}/message_templates";
+        // status=APPROVED: a própria Meta filtra e devolve só os templates aprovados.
+        $parametros = ['status' => 'APPROVED', 'fields' => 'id,name,language,category,quality_score,components', 'limit' => 100];
         $templates = [];
 
-        foreach ($this->templatesFicticios() as $template) {
-            $templates[$template['nome']] = [
-                ...$template,
-                'total_variaveis' => $this->contarVariaveis($template['corpo']),
-            ];
+        // A Meta devolve no máximo 100 por vez; "paging.next" traz o link da próxima página (some na última).
+        while ($url) {
+            // Http:: é o cliente do Laravel para chamar APIs externas (aqui, a da Meta).
+            $resposta = Http::withToken(config('services.whatsapp.token')) // Envia o token: prova que o sistema pode ver os templates da conta.
+                ->connectTimeout(3) // Espera no máximo 3s para conectar.
+                ->timeout(10) // Espera no máximo 10s pela resposta, para a página não ficar travada.
+                ->get($url, $parametros) // Faz a requisição GET; os parâmetros vão na URL (?status=APPROVED&...).
+                ->throw() // Se a Meta responder com erro, lança exceção (tratada em listarAprovados()).
+                ->json(); // Converte a resposta JSON em array.
+
+            foreach ($resposta['data'] ?? [] as $templateDaMeta) {
+                $templates[$templateDaMeta['name']] = $this->converter($templateDaMeta);
+            }
+
+            $url = $resposta['paging']['next'] ?? null;
+            $parametros = []; // O link da próxima página já vem com os parâmetros.
         }
 
         return $templates;
     }
 
     /**
-     * @return array<string, mixed>|null o template, ou null se não existir
-     */
-    public function buscar(?string $nome): ?array
-    {
-        return $this->listar()[$nome] ?? null;
-    }
-
-    /**
-     * Templates que a Meta já aprovou, indexados pelo nome. Só estes podem ser escolhidos numa mensagem.
-     * Na integração, vira a consulta à API da Meta filtrando por status=APPROVED.
+     * Converte um template no formato da Meta para o formato do sistema.
      *
-     * @return array<string, array<string, mixed>>
+     * @param  array<string, mixed>  $templateDaMeta
+     * @return array<string, mixed>
      */
-    public function listarAprovados(): array
+    private function converter(array $templateDaMeta): array
     {
-        return array_filter($this->listar(), fn (array $template) => $template['status'] === StatusTemplateMeta::Aprovado);
+        // O texto principal fica no componente BODY. Cabeçalho, rodapé e botões não são usados aqui.
+        $corpo = collect($templateDaMeta['components'] ?? [])->firstWhere('type', 'BODY')['text'] ?? '';
+
+        return [
+            'nome' => $templateDaMeta['name'],
+            'categoria' => match ($templateDaMeta['category'] ?? null) {
+                'MARKETING' => 'Marketing',
+                'AUTHENTICATION' => 'Autenticação',
+                default => 'Utilidade',
+            },
+            'categoria_classe' => ($templateDaMeta['category'] ?? null) === 'MARKETING' ? 'mkt' : 'util',
+            'idioma' => $templateDaMeta['language'] ?? '',
+            'qualidade' => match ($templateDaMeta['quality_score']['score'] ?? null) {
+                'GREEN' => 'Alta',
+                'YELLOW' => 'Média',
+                'RED' => 'Baixa',
+                default => null,
+            },
+            'id' => $templateDaMeta['id'],
+            'corpo' => $corpo,
+            'total_variaveis' => $this->contarVariaveis($corpo),
+        ];
     }
 
     /**
@@ -62,66 +128,5 @@ class WhatsappTemplateService
         preg_match_all('/\{\{(\d+)\}\}/', $corpo, $encontradas);
 
         return $encontradas[1] === [] ? 0 : max(array_map('intval', $encontradas[1]));
-    }
-
-    /**
-     * Dados fictícios. Substituir pela resposta da API da Meta quando houver integração.
-     *
-     * @return list<array<string, mixed>>
-     */
-    private function templatesFicticios(): array
-    {
-        return [
-            [
-                'nome' => 'confirmacao_inscricao',
-                'categoria' => 'Utilidade',
-                'categoria_classe' => 'util',
-                'idioma' => 'pt_BR',
-                'status' => StatusTemplateMeta::Aprovado,
-                'qualidade' => 'Alta',
-                'id' => '1180239776450912',
-                'corpo' => "Olá {{1}}! 🎉\n\nSua inscrição no *{{2}}* foi confirmada.\n\n📅 {{3}} às {{4}}\n📍 {{5}}\n\nGuarde este contato. Enviaremos os próximos avisos por aqui.",
-            ],
-            [
-                'nome' => 'lembrete_pagamento_15min',
-                'categoria' => 'Utilidade',
-                'categoria_classe' => 'util',
-                'idioma' => 'pt_BR',
-                'status' => StatusTemplateMeta::Aprovado,
-                'qualidade' => 'Alta',
-                'id' => '1180239776450913',
-                'corpo' => 'Olá {{1}}! Sua vaga no {{2}} está reservada, mas o pagamento não foi concluído. Finalize: {{3}}',
-            ],
-            [
-                'nome' => 'lembrete_vespera',
-                'categoria' => 'Utilidade',
-                'categoria_classe' => 'util',
-                'idioma' => 'pt_BR',
-                'status' => StatusTemplateMeta::Aprovado,
-                'qualidade' => 'Média',
-                'id' => '1180239776450914',
-                'corpo' => 'Amanhã é o dia, {{1}}! {{2}} — {{3}} às {{4}}. Chegue 30 min antes.',
-            ],
-            [
-                'nome' => 'aviso_dia_evento',
-                'categoria' => 'Utilidade',
-                'categoria_classe' => 'util',
-                'idioma' => 'pt_BR',
-                'status' => StatusTemplateMeta::Aprovado,
-                'qualidade' => 'Alta',
-                'id' => '1180239776450915',
-                'corpo' => 'Bom dia, {{1}}! Hoje tem {{2}}. Início às {{3}}. Seu QR Code no link.',
-            ],
-            [
-                'nome' => 'convite_lista_quente',
-                'categoria' => 'Marketing',
-                'categoria_classe' => 'mkt',
-                'idioma' => 'pt_BR',
-                'status' => StatusTemplateMeta::EmAnalise,
-                'qualidade' => null,
-                'id' => '1180239776450916',
-                'corpo' => 'Oi {{1}}! Temos um convite para você: {{2}} em {{3}}. Garanta sua vaga: {{4}}',
-            ],
-        ];
     }
 }

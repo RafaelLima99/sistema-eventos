@@ -4,6 +4,8 @@ use App\Models\Automacao;
 use App\Models\Disparo;
 use App\Models\Evento;
 use App\Models\WhatsappMensagem;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 
 // Antes de cada teste, cria um usuário e faz login com ele.
 beforeEach(function () {
@@ -25,19 +27,44 @@ function dadosDaMensagemDeWhatsapp(array $sobrescrever = []): array
     ];
 }
 
-test('lista as mensagens de WhatsApp com o status do template na Meta', function () {
+/**
+ * Finge a resposta da API da Meta com os templates aprovados abaixo, no mesmo formato que a Meta devolve.
+ */
+function fingirTemplatesDaMeta(): void
+{
+    $template = fn (string $nome, string $texto) => [
+        'id' => '1180239776'.strlen($nome),
+        'name' => $nome,
+        'language' => 'pt_BR',
+        'category' => 'UTILITY',
+        'quality_score' => ['score' => 'GREEN'],
+        'components' => [['type' => 'BODY', 'text' => $texto]],
+    ];
+
+    Http::fake([
+        'graph.facebook.com/v24.0/123456/message_templates*' => Http::response(['data' => [
+            $template('confirmacao_inscricao', 'Olá {{1}}! Sua inscrição no {{2}} foi confirmada.'),
+            $template('lembrete_pagamento_15min', 'Olá {{1}}! Sua vaga no {{2}} está reservada. Finalize: {{3}}'),
+            $template('aviso_dia_evento', 'Bom dia, {{1}}! Hoje tem {{2}}. Início às {{3}}.'),
+        ]]),
+    ]);
+}
+
+test('lista as mensagens de WhatsApp mostrando se o template está aprovado', function () {
+    fingirTemplatesDaMeta();
+
     WhatsappMensagem::factory()->create(['titulo' => 'Lembrete de pagamento', 'nome_template_meta' => 'lembrete_pagamento_15min']);
-    WhatsappMensagem::factory()->create(['titulo' => 'Convite quente', 'nome_template_meta' => 'convite_lista_quente']);
+    WhatsappMensagem::factory()->create(['titulo' => 'Convite quente', 'nome_template_meta' => 'template_pausado']);
 
     $this->get(route('whatsapp-mensagens.index'))
         ->assertOk()
-        ->assertSee('Lembrete de pagamento')
-        ->assertSee('Aprovado')
-        ->assertSee('Convite quente')
-        ->assertSee('Em análise');
+        ->assertSeeInOrder(['Lembrete de pagamento', 'Aprovado'])
+        ->assertSeeInOrder(['Convite quente', 'Indisponível']);
 });
 
 test('busca mensagens pelo título', function () {
+    fingirTemplatesDaMeta();
+
     WhatsappMensagem::factory()->create(['titulo' => 'Lembrete de pagamento']);
     WhatsappMensagem::factory()->create(['titulo' => 'Pós-evento']);
 
@@ -48,20 +75,26 @@ test('busca mensagens pelo título', function () {
 });
 
 test('pagina as mensagens de 15 em 15', function () {
+    fingirTemplatesDaMeta();
+
     WhatsappMensagem::factory()->count(16)->create();
 
     $this->get(route('whatsapp-mensagens.index', ['page' => 2]))
         ->assertViewHas('whatsappMensagens', fn ($mensagens) => $mensagens->count() === 1);
 });
 
-test('mostra no formulário de criação só os templates aprovados', function () {
+test('mostra no formulário de criação os templates aprovados', function () {
+    fingirTemplatesDaMeta();
+
     $this->get(route('whatsapp-mensagens.create'))
         ->assertOk()
         ->assertSee('confirmacao_inscricao')
-        ->assertDontSee('convite_lista_quente');
+        ->assertSee('aviso_dia_evento');
 });
 
 test('mostra os detalhes com os dados do template e o vínculo das variáveis', function () {
+    fingirTemplatesDaMeta();
+
     $mensagem = WhatsappMensagem::factory()->create([
         'titulo' => 'Lembrete de pagamento',
         'nome_template_meta' => 'lembrete_pagamento_15min',
@@ -78,15 +111,20 @@ test('mostra os detalhes com os dados do template e o vínculo das variáveis', 
         ->assertSee('Link de pagamento');
 });
 
-test('avisa nos detalhes quando o template não existe mais na Meta', function () {
+test('avisa nos detalhes quando o template não está mais aprovado na Meta', function () {
+    fingirTemplatesDaMeta();
+
     $mensagem = WhatsappMensagem::factory()->create(['nome_template_meta' => 'template_removido']);
 
     $this->get(route('whatsapp-mensagens.show', $mensagem))
         ->assertSee('template_removido')
-        ->assertSee('não foi encontrado na Meta');
+        ->assertSee('Template indisponível')
+        ->assertSee('não está aprovado na Meta');
 });
 
 test('cria uma mensagem de WhatsApp com o template e o vínculo das variáveis', function () {
+    fingirTemplatesDaMeta();
+
     $this->post(route('whatsapp-mensagens.store'), dadosDaMensagemDeWhatsapp())
         ->assertRedirect(route('whatsapp-mensagens.index'))
         ->assertSessionHas('sucesso', 'Mensagem criada.');
@@ -98,6 +136,8 @@ test('cria uma mensagem de WhatsApp com o template e o vínculo das variáveis',
 });
 
 test('não cria a mensagem sem título nem template', function () {
+    fingirTemplatesDaMeta();
+
     $this->post(route('whatsapp-mensagens.store'), [])
         ->assertSessionHasErrors([
             'titulo',
@@ -107,19 +147,16 @@ test('não cria a mensagem sem título nem template', function () {
     expect(WhatsappMensagem::count())->toBe(0);
 });
 
-test('recusa um template que ainda está em análise na Meta', function () {
-    $this->post(route('whatsapp-mensagens.store'), dadosDaMensagemDeWhatsapp(['nome_template_meta' => 'convite_lista_quente']))
-        ->assertSessionHasErrors(['nome_template_meta' => 'Escolha um template aprovado.']);
+test('recusa um template que não está aprovado na Meta', function () {
+    fingirTemplatesDaMeta();
 
-    expect(WhatsappMensagem::count())->toBe(0);
-});
-
-test('recusa um template que não existe', function () {
     $this->post(route('whatsapp-mensagens.store'), dadosDaMensagemDeWhatsapp(['nome_template_meta' => 'inventado']))
         ->assertSessionHasErrors(['nome_template_meta' => 'Escolha um template aprovado.']);
 });
 
 test('salva a mensagem mesmo com variáveis sem campo escolhido', function () {
+    fingirTemplatesDaMeta();
+
     $this->post(route('whatsapp-mensagens.store'), dadosDaMensagemDeWhatsapp([
         'variaveis_template' => [1 => 'nome_inscrito', 2 => '', 3 => 'link_pagamento'],
     ]))->assertRedirect(route('whatsapp-mensagens.index'));
@@ -128,12 +165,16 @@ test('salva a mensagem mesmo com variáveis sem campo escolhido', function () {
 });
 
 test('recusa um campo do sistema que não existe', function () {
+    fingirTemplatesDaMeta();
+
     $this->post(route('whatsapp-mensagens.store'), dadosDaMensagemDeWhatsapp([
         'variaveis_template' => [1 => 'nome_inscrito', 2 => 'campo_inventado', 3 => 'link_pagamento'],
     ]))->assertSessionHasErrors(['variaveis_template.2' => 'Escolha um campo do sistema válido.']);
 });
 
 test('atualiza a mensagem trocando o template e o vínculo', function () {
+    fingirTemplatesDaMeta();
+
     $mensagem = WhatsappMensagem::factory()->create();
 
     $this->put(route('whatsapp-mensagens.update', $mensagem), dadosDaMensagemDeWhatsapp([
@@ -150,6 +191,8 @@ test('atualiza a mensagem trocando o template e o vínculo', function () {
 });
 
 test('não atualiza a mensagem com dados inválidos', function () {
+    fingirTemplatesDaMeta();
+
     $mensagem = WhatsappMensagem::factory()->create(['titulo' => 'Original']);
 
     $this->put(route('whatsapp-mensagens.update', $mensagem), dadosDaMensagemDeWhatsapp(['titulo' => '']))
@@ -159,6 +202,8 @@ test('não atualiza a mensagem com dados inválidos', function () {
 });
 
 test('mostra o formulário de edição com os dados da mensagem', function () {
+    fingirTemplatesDaMeta();
+
     $mensagem = WhatsappMensagem::factory()->create(['titulo' => 'Confirmação de inscrição']);
 
     $this->get(route('whatsapp-mensagens.edit', $mensagem))
@@ -196,6 +241,40 @@ test('não remove a mensagem que uma automação ou um disparo usa', function (s
 
     $this->assertModelExists($mensagem);
 })->with(['automação', 'disparo']);
+
+test('busca na API da Meta só os templates aprovados, com o token configurado', function () {
+    fingirTemplatesDaMeta();
+
+    $this->get(route('whatsapp-mensagens.create'))->assertOk();
+
+    Http::assertSent(fn (Request $request) => $request->hasHeader('Authorization', 'Bearer token-de-teste')
+        && str_starts_with($request->url(), 'https://graph.facebook.com/v24.0/123456/message_templates')
+        && $request['status'] === 'APPROVED');
+});
+
+test('busca as próximas páginas de templates da Meta', function () {
+    Http::fake([
+        'graph.facebook.com/v24.0/123456/message_templates*' => Http::response([
+            'data' => [['id' => '1', 'name' => 'primeira_pagina', 'language' => 'pt_BR', 'category' => 'UTILITY', 'components' => [['type' => 'BODY', 'text' => 'Olá {{1}}']]]],
+            'paging' => ['next' => 'https://graph.facebook.com/v24.0/pagina-2'],
+        ]),
+        'graph.facebook.com/v24.0/pagina-2' => Http::response([
+            'data' => [['id' => '2', 'name' => 'segunda_pagina', 'language' => 'pt_BR', 'category' => 'UTILITY', 'components' => [['type' => 'BODY', 'text' => 'Oi {{1}}']]]],
+        ]),
+    ]);
+
+    $this->get(route('whatsapp-mensagens.create'))
+        ->assertSee('primeira_pagina')
+        ->assertSee('segunda_pagina');
+});
+
+test('abre o formulário com um aviso quando a Meta não responde', function () {
+    Http::fake(['graph.facebook.com/*' => Http::response(['error' => ['message' => 'Invalid OAuth access token']], 401)]);
+
+    $this->get(route('whatsapp-mensagens.create'))
+        ->assertOk()
+        ->assertSee('Nenhum template aprovado encontrado na Meta.');
+});
 
 test('responde 404 para uma mensagem que não existe', function () {
     $this->get(route('whatsapp-mensagens.show', 999))->assertNotFound();

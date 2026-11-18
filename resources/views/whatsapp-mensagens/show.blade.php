@@ -15,7 +15,9 @@
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
     <span class="chan-ic wa"><i class="bi bi-whatsapp"></i></span>
     @if ($template)
-        <span class="badge-status {{ $template['status']->badgeClass() }}"><span class="b-dot"></span>Template {{ mb_strtolower($template['status']->label()) }}</span>
+        <span class="badge-status bs-green"><span class="b-dot"></span>Template aprovado</span>
+    @else
+        <span class="badge-status bs-slate"><span class="b-dot"></span>Template indisponível</span>
     @endif
     <div class="ms-auto d-flex flex-wrap gap-2">
         <a href="{{ route('whatsapp-mensagens.edit', $whatsappMensagem) }}" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i>Editar</a>
@@ -51,7 +53,6 @@
                     <dt>Nome do template</dt><dd class="mono">{{ $template['nome'] }}</dd>
                     <dt>Categoria</dt><dd>{{ $template['categoria'] }}</dd>
                     <dt>Idioma</dt><dd><span class="mono">{{ $template['idioma'] }}</span></dd>
-                    <dt>Status na Meta</dt><dd><span class="badge-status {{ $template['status']->badgeClass() }}"><span class="b-dot"></span>{{ $template['status']->label() }}</span></dd>
                     <dt>Qualidade</dt><dd>{{ $template['qualidade'] ?? '—' }}</dd>
                     <dt>ID do template</dt><dd class="mono">{{ $template['id'] }}</dd>
                 </dl>
@@ -63,7 +64,7 @@
                 <dl class="kv" style="grid-template-columns:170px 1fr">
                     <dt>Nome do template</dt><dd class="mono">{{ $whatsappMensagem->nome_template_meta }}</dd>
                 </dl>
-                <p class="form-hint mt-2">Este template não foi encontrado na Meta. Edite a mensagem e escolha outro.</p>
+                <p class="form-hint mt-2">Este template não está aprovado na Meta (foi pausado, desativado ou removido). Edite a mensagem e escolha outro.</p>
             @endif
         </div>
     </div>
