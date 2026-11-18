@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AutomacaoController;
 use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\ContatoImportacaoController;
+use App\Http\Controllers\DisparoController;
 use App\Http\Controllers\EmailMensagemController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\InscritoController;
@@ -57,9 +58,7 @@ Route::middleware('auth')->group(function () {
         ->parameters(['email-mensagens' => 'emailMensagem']);
 
     // Disparos
-    Route::view('/disparos', 'disparos.index')->name('disparos.index');
-    Route::view('/disparos/create', 'disparos.create')->name('disparos.create');
-    Route::view('/disparos/{id}/edit', 'disparos.edit')->name('disparos.edit');
+    Route::resource('disparos', DisparoController::class)->except('show');
 
     // Usuários
     Route::resource('usuarios', UserController::class)->except('show');

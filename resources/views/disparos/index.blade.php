@@ -19,7 +19,7 @@
         <form method="GET" class="d-flex flex-wrap align-items-center gap-2 flex-grow-1">
             <div class="search-inline flex-grow-1">
                 <i class="bi bi-search"></i>
-                <input type="text" name="q" placeholder="Buscar disparo...">
+                <input type="text" name="busca_nome" value="{{ request('busca_nome') }}" placeholder="Buscar pela mensagem...">
             </div>
             <button type="submit" class="btn btn-outline-primary">
                 <i class="bi bi-search"></i>Buscar
@@ -31,388 +31,67 @@
         <table class="data">
             <thead>
                 <tr>
-                    <th>Disparo</th>
-                    <th>Canal</th>
+                    <th>Mensagem</th>
+                    <th>Contatos</th>
                     <th>Envio</th>
                     <th>Status</th>
                     <th class="text-end">Ações</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <span class="strong">Convite — lote 2</span>
-                    </td>
-                    <td>
-                        <span class="chan-ic wa">
-                            <i class="bi bi-whatsapp"></i>
-                        </span>
-                        WhatsApp
-                    </td>
-                    <td>
-                        Agendado · <span class="strong">12/09 10:00</span>
-                    </td>
-                    <td>
-                        <span class="badge-status bs-amber">
-                            <span class="b-dot"></span>Agendado
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-eye"></i>Detalhes
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('disparos.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <span class="strong">Reforço de pagamento</span>
-                    </td>
-                    <td>
-                        <span class="chan-ic wa">
-                            <i class="bi bi-whatsapp"></i>
-                        </span>
-                        WhatsApp
-                    </td>
-                    <td>
-                        Enviado · <span class="strong">06/09 15:20</span>
-                    </td>
-                    <td>
-                        <span class="badge-status bs-blue">
-                            <span class="b-dot"></span>Concluído
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-eye"></i>Detalhes
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('disparos.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <span class="strong">Boas-vindas VIP</span>
-                    </td>
-                    <td>
-                        <span class="chan-ic wa">
-                            <i class="bi bi-whatsapp"></i>
-                        </span>
-                        WhatsApp
-                    </td>
-                    <td>
-                        Enviado · <span class="strong">04/09 09:00</span>
-                    </td>
-                    <td>
-                        <span class="badge-status bs-blue">
-                            <span class="b-dot"></span>Concluído
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-eye"></i>Detalhes
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('disparos.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <span class="strong">Lembrete véspera (extra)</span>
-                    </td>
-                    <td>
-                        <span class="chan-ic em">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                        E-mail
-                    </td>
-                    <td>
-                        Agendado · <span class="strong">17/09 20:00</span>
-                    </td>
-                    <td>
-                        <span class="badge-status bs-amber">
-                            <span class="b-dot"></span>Agendado
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-eye"></i>Detalhes
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('disparos.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <span class="strong">Instruções de estacionamento</span>
-                    </td>
-                    <td>
-                        <span class="chan-ic wa">
-                            <i class="bi bi-whatsapp"></i>
-                        </span>
-                        WhatsApp
-                    </td>
-                    <td class="muted">— a definir</td>
-                    <td>
-                        <span class="badge-status bs-slate">
-                            <span class="b-dot"></span>Rascunho
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-eye"></i>Detalhes
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('disparos.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <span class="strong">Pesquisa pós-evento</span>
-                    </td>
-                    <td>
-                        <span class="chan-ic em">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                        E-mail
-                    </td>
-                    <td>
-                        Agendado · <span class="strong">19/09 10:00</span>
-                    </td>
-                    <td>
-                        <span class="badge-status bs-amber">
-                            <span class="b-dot"></span>Agendado
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-eye"></i>Detalhes
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('disparos.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <span class="strong">Agradecimento + gravações</span>
-                    </td>
-                    <td>
-                        <span class="chan-ic em">
-                            <i class="bi bi-envelope"></i>
-                        </span>
-                        E-mail
-                    </td>
-                    <td>
-                        Agendado · <span class="strong">20/09 09:00</span>
-                    </td>
-                    <td>
-                        <span class="badge-status bs-slate">
-                            <span class="b-dot"></span>Rascunho
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-eye"></i>Detalhes
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('disparos.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <span class="strong">Aviso de mudança de sala</span>
-                    </td>
-                    <td>
-                        <span class="chan-ic wa">
-                            <i class="bi bi-whatsapp"></i>
-                        </span>
-                        WhatsApp
-                    </td>
-                    <td>
-                        Enviado · <span class="strong">05/09 11:10</span>
-                    </td>
-                    <td>
-                        <span class="badge-status bs-blue">
-                            <span class="b-dot"></span>Concluído
-                        </span>
-                    </td>
-                    <td class="text-end">
-                        <div class="dropdown d-inline-block">
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown">
-                                <i class="bi bi-three-dots"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-eye"></i>Detalhes
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('disparos.edit', 1) }}">
-                                        <i class="bi bi-pencil"></i>Editar
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-danger" href="#">
-                                        <i class="bi bi-trash text-danger"></i>Remover
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
+                @forelse ($disparos as $disparo)
+                    <tr>
+                        <td>
+                            <span class="chan-ic wa"><i class="bi bi-whatsapp"></i></span>
+                            <span class="strong">{{ $disparo->whatsappMensagem?->titulo ?? '—' }}</span>
+                        </td>
+                        <td>{{ $disparo->todos_contatos ? 'Todos os contatos' : $disparo->eventos_count.' evento(s)' }}</td>
+                        <td>
+                            @if ($disparo->agendado_para)
+                                <span class="strong">{{ $disparo->agendado_para->format('d/m/Y H:i') }}</span>
+                            @else
+                                <span class="muted">Envio imediato</span>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="badge-status {{ $disparo->status->badgeClass() }}"><span class="b-dot"></span>{{ $disparo->status->label() }}</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="dropdown d-inline-block">
+                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="dropdown" data-bs-config='{"popperConfig":{"strategy":"fixed"}}'>
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('disparos.edit', $disparo) }}">
+                                            <i class="bi bi-pencil"></i>Editar
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ route('disparos.destroy', $disparo) }}" onsubmit="return confirm('Deseja remover este disparo?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-trash text-danger"></i>Remover</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Nenhum disparo encontrado.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
-    <div class="table-foot d-flex align-items-center">
-        <nav class="ms-auto" aria-label="Paginação de disparos">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                        <i class="bi bi-chevron-left"></i>
-                    </a>
-                </li>
-                <li class="page-item active" aria-current="page">
-                    <a class="page-link" href="#">1</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#">2</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="#">
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+
+    @if ($disparos->hasPages())
+        <div class="table-foot d-flex align-items-center">
+            {{ $disparos->links() }}
+        </div>
+    @endif
 </div>
 @endsection

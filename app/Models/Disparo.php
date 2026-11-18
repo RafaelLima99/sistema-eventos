@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\FiltroPublico;
+use App\Enums\StatusDisparo;
+use Database\Factories\DisparoFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -16,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 ])]
 class Disparo extends Model
 {
+    /** @use HasFactory<DisparoFactory> */
+    use HasFactory;
+
     /**
      * @return BelongsTo<WhatsappMensagem, $this>
      */
@@ -41,7 +48,9 @@ class Disparo extends Model
     {
         return [
             'todos_contatos' => 'boolean',
+            'filtro' => FiltroPublico::class,
             'agendado_para' => 'datetime',
+            'status' => StatusDisparo::class,
         ];
     }
 }
