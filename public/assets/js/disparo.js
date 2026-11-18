@@ -1,33 +1,41 @@
-// Formulário de disparo: card 1 (contatos) e card 2 (filtro) — seleção funcional, sem back-end.
+// Formulário de disparo: destaca as opções marcadas (contatos e eventos),
+// mostra a lista de eventos só com "Inscritos em evento" e filtra essa lista pela busca.
 document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('fDisparo');
     if (!form) return;
 
-    var box = document.getElementById('contatosEventos');
+    var listaEventos = document.getElementById('contatosEventos');
     var busca = document.getElementById('buscaEvento');
 
-    function sincronizar() {
-        // destaca a opção marcada (radio e checkbox dentro de .opt-card / .ev-opt)
-        form.querySelectorAll('.opt-card, .ev-opt').forEach(function (el) {
-            var i = el.querySelector('input');
-            if (i) el.classList.toggle('on', i.checked);
+    function atualizarTela() {
+        // Destaca (classe "on") os cards e eventos que estão marcados.
+        form.querySelectorAll('.opt-card, .ev-opt').forEach(function (opcao) {
+            var input = opcao.querySelector('input');
+            if (input) opcao.classList.toggle('on', input.checked);
         });
 
-        // select de eventos só aparece (e só é enviado) com "Contatos inscritos em evento"
-        var modo = form.querySelector('input[name="contatos"]:checked');
-        var porEvento = !!modo && modo.value === 'evento';
-        box.classList.toggle('d-none', !porEvento);
-        box.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.disabled = !porEvento; });
+        // A lista de eventos só aparece com "Inscritos em evento" (value 0).
+        var contatos = form.querySelector('input[name="todos_contatos"]:checked');
+        var porEvento = !!contatos && contatos.value === '0';
+        listaEventos.classList.toggle('d-none', !porEvento);
+
+        // Checkbox desabilitado não é enviado: com "Todos os contatos", nenhum evento vai para o servidor.
+        listaEventos.querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) {
+            checkbox.disabled = !porEvento;
+        });
     }
 
-    form.addEventListener('change', sincronizar);
+    // Qualquer clique em radio ou checkbox do formulário atualiza a tela.
+    form.addEventListener('change', atualizarTela);
 
+    // Esconde os eventos cujo nome não tem o texto digitado.
     busca.addEventListener('input', function () {
         var termo = busca.value.trim().toLowerCase();
-        box.querySelectorAll('.ev-opt').forEach(function (op) {
-            op.classList.toggle('d-none', op.textContent.toLowerCase().indexOf(termo) === -1);
+        listaEventos.querySelectorAll('.ev-opt').forEach(function (evento) {
+            evento.classList.toggle('d-none', evento.textContent.toLowerCase().indexOf(termo) === -1);
         });
     });
 
-    sincronizar();
+    // Ao abrir a página (na edição ou depois de um erro de validação), já mostra o que vem marcado.
+    atualizarTela();
 });
