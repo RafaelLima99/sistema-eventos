@@ -13,7 +13,10 @@ use Illuminate\Support\Str;
  */
 class HotmartWebhookService
 {
-    public function __construct(private ContatoService $contatoService) {}
+    public function __construct(
+        private ContatoService $contatoService,
+        private AutomacaoEnvioService $automacaoEnvioService,
+    ) {}
 
     /**
      * Cria (ou atualiza) o contato do comprador e o inscreve no evento.
@@ -45,7 +48,7 @@ class HotmartWebhookService
             return $inscrito;
         }
 
-        return Inscrito::create([
+        $inscrito = Inscrito::create([
             'evento_id' => $evento->id,
             'contato_id' => $contato->id,
             'plataforma' => 'hotmart',
@@ -53,6 +56,14 @@ class HotmartWebhookService
             'tipo_ingresso' => null,
             ...$dadosDaCompra,
         ]);
+
+        // Só chega aqui quem comprou direto na Hotmart, sem passar antes pelo formulário da Greatpages:
+        // a inscrição acabou de ser criada agora. Por isso envia as mensagens das automações
+        // "Logo após a inscrição" deste evento, se houver.
+        // Quem já tinha se inscrito pela Greatpages não recebe de novo: o if lá em cima só atualiza e sai.
+        $this->automacaoEnvioService->enviarMensagensImediatasSeHouver($inscrito);
+
+        return $inscrito;
     }
 
     /**

@@ -46,6 +46,13 @@ return [
         'versao' => env('WHATSAPP_API_VERSION', 'v24.0'),
     ],
 
+    'sendgrid' => [
+        // API do SendGrid (Twilio), usada para enviar os e-mails das automações.
+        // Chave em: SendGrid > Settings > API Keys (permissão "Mail Send").
+        // O remetente é o MAIL_FROM_ADDRESS, que precisa estar verificado no SendGrid (Sender Authentication).
+        'api_key' => env('SENDGRID_API_KEY'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
