@@ -58,7 +58,8 @@ test('inscrição pela Greatpages envia na hora o e-mail da automação, com as 
         && $request['from'] === ['email' => 'contato@eventos.test', 'name' => 'Eventos']
         && $request['subject'] === 'Inscrição confirmada — Summit de Marketing'
         && $request['content'][0] === ['type' => 'text/plain', 'value' => "Olá Ana Silva,\nte esperamos no Summit de Marketing."]
-        && $request['content'][1] === ['type' => 'text/html', 'value' => "Olá Ana Silva,<br />\nte esperamos no Summit de Marketing."]);
+        && $request['content'][1]['type'] === 'text/html'
+        && str_contains($request['content'][1]['value'], "<p style=\"margin:0 0 16px;\">Olá Ana Silva,<br />\nte esperamos no Summit de Marketing.</p>"));
 });
 
 test('compra aprovada na Hotmart envia o e-mail da automação para pagantes', function () {
@@ -174,4 +175,30 @@ test('preenche as variáveis com os dados do inscrito e do evento', function () 
     );
 
     expect($texto)->toBe('Ana | Summit | 10/12/2026 | 09:00 | Centro de Convenções – Recife/PE | VIP | ');
+});
+
+test('o e-mail HTML usa o layout, só com o texto da mensagem, links clicáveis e o texto protegido', function () {
+    fingirSendgrid();
+    config(['mail.from.name' => 'Eventos']);
+
+    $evento = Evento::factory()->create([
+        'data_evento' => '2026-12-10',
+        'link_pagamento' => 'https://pay.example.com/summit?a=1&b=2',
+    ]);
+    $inscrito = Inscrito::factory()->create(['evento_id' => $evento->id]);
+    $automacao = criarAutomacaoDeEmailImediata($evento, [
+        'email_mensagem_id' => EmailMensagem::factory()->create(['conteudo' => "Pague em {{link_pagamento}}\n<b>até amanhã</b>"])->id,
+    ]);
+
+    app()->call([new EnviarEmailDaAutomacao($automacao, $inscrito), 'handle']);
+
+    Http::assertSent(function (Request $request) {
+        $html = $request['content'][1]['value'];
+
+        return str_contains($html, '<a href="https://pay.example.com/summit?a=1&amp;b=2" style="color:#2563eb; text-decoration:underline;">https://pay.example.com/summit?a=1&amp;b=2</a>')
+            && str_contains($html, '&lt;b&gt;até amanhã&lt;/b&gt;') // o "<b>" escrito no texto não vira tag
+            && str_contains($html, 'porque se inscreveu em um dos nossos eventos') // rodapé
+            && str_contains($html, '© '.now()->year.' Eventos') // rodapé: ano e quem envia
+            && ! str_contains($html, '10/12/2026') && ! str_contains($html, 'dezembro'); // sem dados do evento fora do texto
+    });
 });
