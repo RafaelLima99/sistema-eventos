@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Inscrito;
+
 /**
  * Variáveis que podem ser escritas nas mensagens de e-mail, no formato {{nome}}.
  */
@@ -65,5 +67,37 @@ class EmailVariaveisService
         }
 
         return 'Variáveis desconhecidas: '.implode(', ', $desconhecidas).'.';
+    }
+
+    /**
+     * Troca as variáveis do texto pelos dados do inscrito e do evento.
+     *
+     * Ex.: "Olá {{nome}}, te esperamos no {{evento}}" => "Olá Ana, te esperamos no Summit".
+     */
+    public function preencher(string $texto, Inscrito $inscrito): string
+    {
+        $evento = $inscrito->evento;
+
+        // Valor de cada variável (sem as chaves).
+        $valores = [
+            'nome' => $inscrito->contato->nome,
+            'evento' => $evento->titulo,
+            'data' => $evento->data_evento->format('d/m/Y'),
+            'horario' => $evento->hora_inicio,
+            'localidade' => "{$evento->local} – {$evento->cidade}/{$evento->uf->value}",
+            'link_inscricao' => $evento->link_inscricao,
+            'link_pagamento' => $evento->link_pagamento,
+            // Ainda não existe um campo de responsável no sistema: a variável sai vazia.
+            'responsavel' => '',
+            'tipo_ingresso' => $inscrito->tipo_ingresso,
+        ];
+
+        // Acha cada {{palavra}} (com ou sem espaços dentro das chaves) e troca pelo valor dela.
+        // Variável sem valor (ex.: evento sem link de pagamento) sai vazia.
+        return preg_replace_callback(
+            '/\{\{\s*(\w+)\s*\}\}/',
+            fn (array $encontrada) => (string) ($valores[$encontrada[1]] ?? ''),
+            $texto,
+        );
     }
 }

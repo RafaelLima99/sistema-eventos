@@ -90,6 +90,13 @@ services:
       timeout: 3s
       retries: 3
 
+  # Fila: processa os jobs em segundo plano (ex.: envio dos e-mails das automações).
+  # Usa a mesma imagem do app (<<: *app), então não ocupa disco a mais: só muda o comando.
+  # O custo é um processo PHP a mais (~70 MB de memória).
+  # queue:work carrega o código uma vez e fica rodando (mais leve que o queue:listen do desenvolvimento),
+  # mas não percebe código novo: a cada deploy, reinicie a fila (docker compose restart queue).
+  # --max-time=3600: o worker encerra a cada 1 hora e o "restart: unless-stopped" (do x-app) sobe de novo,
+  # o que evita acúmulo de memória. Esse restart também faz o papel do supervisor se o processo cair.
   queue:
     <<: *app
     depends_on:

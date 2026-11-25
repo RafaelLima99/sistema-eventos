@@ -40,6 +40,15 @@ services:
     depends_on:
       - app
 
+  # Fila: processa os jobs em segundo plano (ex.: envio dos e-mails das automações).
+  # Sobe sozinho com `docker compose up -d`; não precisa rodar queue:work à mão.
+  # Usa a mesma imagem do app (<<: *app), então não ocupa disco a mais: só muda o comando.
+  # O custo é um processo PHP a mais (~70 MB de memória).
+  # queue:listen abre um processo novo a cada ciclo: pega as mudanças no código sem reiniciar
+  # (bom para desenvolvimento). Em produção usa-se queue:work (ver compose.prod.yaml).
+  # Atenção: o .env é lido só quando a fila sobe. Mudou o .env? Rode: docker compose restart queue
+  # O --tries=1 vale só para jobs que não definem $tries (o EnviarEmailDaAutomacao define 3).
+  # Ver os jobs rodando: docker compose logs -f queue
   queue:
     <<: *app
     command: php artisan queue:listen --tries=1 --timeout=0

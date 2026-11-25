@@ -13,7 +13,10 @@ use Illuminate\Support\Str;
  */
 class GreatpagesWebhookService
 {
-    public function __construct(private ContatoService $contatoService) {}
+    public function __construct(
+        private ContatoService $contatoService,
+        private AutomacaoEnvioService $automacaoEnvioService,
+    ) {}
 
     /**
      * Cria (ou atualiza) o contato e o inscreve no evento com o ingresso pendente.
@@ -35,7 +38,7 @@ class GreatpagesWebhookService
             return $inscrito;
         }
 
-        return Inscrito::create([
+        $inscrito = Inscrito::create([
             'evento_id' => $evento->id,
             'contato_id' => $contato->id,
             'status_ingresso' => StatusIngresso::Pendente,
@@ -50,6 +53,12 @@ class GreatpagesWebhookService
             'utm_campaign' => $dados['utm_campaign'] ?? null,
             'utm_content' => $dados['utm_content'] ?? null,
         ]);
+
+        // Inscrição nova: envia na hora as mensagens das automações "Logo após a inscrição" deste evento, se houver.
+        // Por enquanto só e-mail; o envio de WhatsApp ainda falta implementar (ver TODO no AutomacaoEnvioService).
+        $this->automacaoEnvioService->enviarMensagensImediatasSeHouver($inscrito);
+
+        return $inscrito;
     }
 
     /**
