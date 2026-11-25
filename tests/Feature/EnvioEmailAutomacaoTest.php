@@ -202,3 +202,25 @@ test('o e-mail HTML usa o layout, só com o texto da mensagem, links clicáveis 
             && ! str_contains($html, '10/12/2026') && ! str_contains($html, 'dezembro'); // sem dados do evento fora do texto
     });
 });
+
+test('aceita *negrito* no texto do e-mail', function () {
+    fingirSendgrid();
+
+    $evento = Evento::factory()->create();
+    $inscrito = Inscrito::factory()->create(['evento_id' => $evento->id]);
+    $automacao = criarAutomacaoDeEmailImediata($evento, [
+        'email_mensagem_id' => EmailMensagem::factory()->create([
+            'conteudo' => "Vaga *garantida*!\nConta: 2 * 3 * 4",
+        ])->id,
+    ]);
+
+    app()->call([new EnviarEmailDaAutomacao($automacao, $inscrito), 'handle']);
+
+    Http::assertSent(function (Request $request) {
+        $html = $request['content'][1]['value'];
+
+        return str_contains($html, 'Vaga <strong>garantida</strong>!')
+            // Asteriscos com espaço não viram negrito.
+            && str_contains($html, 'Conta: 2 * 3 * 4');
+    });
+});

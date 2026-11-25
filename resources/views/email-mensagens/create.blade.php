@@ -40,6 +40,7 @@
                     @error('conteudo')
                         <div class="invalid-feedback d-block">{{ $message }}</div>
                     @enderror
+                    <div class="form-hint">Negrito: *texto*</div>
                 </div>
 
                 <div>

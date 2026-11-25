@@ -63,10 +63,12 @@ class EnviarEmailDaAutomacao implements ShouldQueue
     }
 
     /**
-     * Converte o texto simples da mensagem para HTML, mantendo a aparência que a pessoa escreveu.
+     * Converte o texto da mensagem para HTML, mantendo a aparência que a pessoa escreveu.
      *
-     * Ex.: "Olá Ana,\n\nPague em https://pay.com/x"
-     *   => <p>Olá Ana,</p><p>Pague em <a href="https://pay.com/x">https://pay.com/x</a></p>
+     * Formatação aceita no texto:
+     * - *negrito*        => <strong>negrito</strong>
+     * - https://…        => link clicável
+     * - linha em branco  => novo parágrafo
      */
     private function converterTextoParaHtml(string $texto): string
     {
@@ -75,6 +77,9 @@ class EnviarEmailDaAutomacao implements ShouldQueue
 
         // Links (http:// ou https://) viram clicáveis, ex.: o {{link_pagamento}}.
         $html = preg_replace('/https?:\/\/[^\s<]+/', '<a href="$0" style="color:#2563eb; text-decoration:underline;">$0</a>', $html);
+
+        // *texto* vira negrito (igual ao WhatsApp). Precisa de letra colada nos asteriscos: "2 * 3 * 4" não muda.
+        $html = preg_replace('/\*(\S(?:[^*\n]*\S)?)\*/', '<strong>$1</strong>', $html);
 
         // Cada bloco separado por uma linha em branco vira um parágrafo (<p>), com espaço entre eles.
         $paragrafos = preg_split('/\R{2,}/', trim($html));
