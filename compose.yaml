@@ -4,7 +4,7 @@
 #
 # Variáveis (DB_*, APP_PORT etc.) vêm do .env do projeto.
 # Overrides pessoais: compose.override.yaml (ignorado pelo git).
-# O scheduler não sobe aqui: use `docker compose exec app php artisan schedule:work`.
+# A fila (queue) e o agendador (scheduler) sobem juntos, igual à produção.
 
 name: sistema-eventos
 
@@ -55,6 +55,18 @@ services:
     depends_on:
       - app
 
+  # Agendador: a cada minuto roda as tarefas de routes/console.php (ex.: e-mails agendados das automações).
+  # Sobe sozinho com `docker compose up -d`, igual à produção; não precisa rodar schedule:work à mão.
+  # Usa a mesma imagem do app (<<: *app): só muda o comando.
+  # Cada rodada lê o código atualizado, mas o .env só é lido quando o container sobe.
+  # Mudou o .env? Rode: docker compose restart scheduler
+  # Ver o que está rodando: docker compose logs -f scheduler
+  scheduler:
+    <<: *app
+    command: php artisan schedule:work
+    depends_on:
+      - app
+
   db:
     image: mysql:8.4
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
@@ -73,11 +85,6 @@ services:
       timeout: 3s
       retries: 20
       start_period: 20s
-
-  mailpit:
-    image: axllent/mailpit:v1.21
-    ports:
-      - "${MAILPIT_PORT:-8025}:8025"
 
 volumes:
   dbdata:

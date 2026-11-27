@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\CanalMensagem;
 use App\Enums\FiltroPublico;
 use App\Enums\StatusAutomacao;
+use App\Enums\TipoGatilho;
 use Database\Factories\AutomacaoFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -70,6 +71,7 @@ class Automacao extends Model
     {
         return [
             'canal' => CanalMensagem::class,
+            'tipo_gatilho' => TipoGatilho::class,
             'minutos_disparo' => 'integer',
             'filtro' => FiltroPublico::class,
             'status' => StatusAutomacao::class,

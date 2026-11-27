@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('evento_id')->constrained('eventos')->cascadeOnDelete();
             $table->foreignId('contato_id')->constrained('contatos')->cascadeOnDelete();
             $table->string('status_ingresso', 20)->default('pendente');
+            // Quando o pagamento foi aprovado (webhook da Hotmart). Vazio = ainda não pagou.
+            // As automações "após o pagamento" contam o tempo a partir daqui.
+            $table->timestamp('pago_em')->nullable();
             $table->string('status_presenca', 20)->default('pendente');
             $table->string('plataforma', 30)->nullable();
             $table->string('tipo_ingresso', 50)->nullable();

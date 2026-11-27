@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'evento_id',
     'contato_id',
     'status_ingresso',
+    'pago_em',
     'status_presenca',
     'plataforma',
     'tipo_ingresso',
@@ -54,6 +55,7 @@ class Inscrito extends Model
     {
         return [
             'status_ingresso' => StatusIngresso::class,
+            'pago_em' => 'datetime',
             'status_presenca' => StatusPresenca::class,
             'quantidade_ingresso' => 'integer',
             'valor_pago' => 'decimal:2',

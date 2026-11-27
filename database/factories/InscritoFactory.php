@@ -40,6 +40,7 @@ class InscritoFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status_ingresso' => StatusIngresso::Pago,
+            'pago_em' => now(),
         ]);
     }
 

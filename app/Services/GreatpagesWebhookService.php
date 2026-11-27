@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\StatusIngresso;
+use App\Enums\TipoGatilho;
 use App\Models\Contato;
 use App\Models\Evento;
 use App\Models\Inscrito;
@@ -56,7 +57,7 @@ class GreatpagesWebhookService
 
         // Inscrição nova: envia na hora as mensagens das automações "Logo após a inscrição" deste evento, se houver.
         // Por enquanto só e-mail; o envio de WhatsApp ainda falta implementar (ver TODO no AutomacaoEnvioService).
-        $this->automacaoEnvioService->enviarMensagensImediatasSeHouver($inscrito);
+        $this->automacaoEnvioService->enviarMensagensImediatasSeHouver($inscrito, TipoGatilho::AposInscricao);
 
         return $inscrito;
     }

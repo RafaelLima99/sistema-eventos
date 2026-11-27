@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Enums\CanalMensagem;
 use App\Enums\FiltroPublico;
 use App\Enums\StatusAutomacao;
+use App\Enums\TipoGatilho;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -29,6 +30,7 @@ class StoreAutomacaoRequest extends FormRequest
         return [
             'titulo' => ['required', 'string', 'max:255'],
             'evento_id' => ['required', 'exists:eventos,id'],
+            'tipo_gatilho' => ['required', Rule::enum(TipoGatilho::class)],
             'horas' => ['required', 'integer', 'min:0'],
             'minutos' => ['required', 'integer', 'between:0,59'],
             'filtro' => ['required', Rule::enum(FiltroPublico::class)],
