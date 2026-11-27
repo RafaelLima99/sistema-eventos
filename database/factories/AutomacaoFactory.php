@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\CanalMensagem;
 use App\Enums\FiltroPublico;
 use App\Enums\StatusAutomacao;
+use App\Enums\TipoGatilho;
 use App\Models\Automacao;
 use App\Models\EmailMensagem;
 use App\Models\Evento;
@@ -29,6 +30,7 @@ class AutomacaoFactory extends Factory
             'canal' => CanalMensagem::Whatsapp,
             'whatsapp_mensagem_id' => WhatsappMensagem::factory(),
             'email_mensagem_id' => null,
+            'tipo_gatilho' => TipoGatilho::AposInscricao,
             'minutos_disparo' => 15,
             'filtro' => FiltroPublico::NaoPagantes,
             'status' => StatusAutomacao::Ativo,
@@ -44,6 +46,17 @@ class AutomacaoFactory extends Factory
             'canal' => CanalMensagem::Email,
             'whatsapp_mensagem_id' => null,
             'email_mensagem_id' => EmailMensagem::factory(),
+        ]);
+    }
+
+    /**
+     * Indicate that the automation counts the time from the payment.
+     */
+    public function aposPagamento(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tipo_gatilho' => TipoGatilho::AposPagamento,
+            'filtro' => FiltroPublico::Pagantes,
         ]);
     }
 

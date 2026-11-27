@@ -3,6 +3,7 @@
 use App\Enums\CanalMensagem;
 use App\Enums\FiltroPublico;
 use App\Enums\StatusAutomacao;
+use App\Enums\TipoGatilho;
 use App\Models\Automacao;
 use App\Models\EmailMensagem;
 use App\Models\Evento;
@@ -23,6 +24,7 @@ function dadosDaAutomacao(array $sobrescrever = []): array
     return [
         'titulo' => 'Lembrete de pagamento (15 min)',
         'evento_id' => Evento::factory()->create()->id,
+        'tipo_gatilho' => 'apos_inscricao',
         'horas' => 0,
         'minutos' => 15,
         'filtro' => 'nao_pagantes',
@@ -88,6 +90,7 @@ test('cria uma automação de WhatsApp', function () {
     expect(Automacao::firstOrFail())
         ->titulo->toBe('Lembrete de pagamento (15 min)')
         ->evento_id->toBe($dados['evento_id'])
+        ->tipo_gatilho->toBe(TipoGatilho::AposInscricao)
         ->minutos_disparo->toBe(15)
         ->filtro->toBe(FiltroPublico::NaoPagantes)
         ->canal->toBe(CanalMensagem::Whatsapp)
@@ -162,6 +165,30 @@ test('mostra o tempo em horas e minutos na listagem', function (int $minutosDisp
     'só minutos' => [15, '15min após a inscrição'],
     'só horas' => [120, '2h  após a inscrição'],
     'horas e minutos' => [90, '1h 30min após a inscrição'],
+]);
+
+test('"após o pagamento" vale sempre para quem pagou, qualquer que seja o público enviado', function () {
+    $this->post(route('automacoes.store'), dadosDaAutomacao(['tipo_gatilho' => 'apos_pagamento', 'filtro' => 'nao_pagantes']));
+
+    expect(Automacao::firstOrFail())
+        ->tipo_gatilho->toBe(TipoGatilho::AposPagamento)
+        ->filtro->toBe(FiltroPublico::Pagantes);
+});
+
+test('recusa um gatilho que não existe', function () {
+    $this->post(route('automacoes.store'), dadosDaAutomacao(['tipo_gatilho' => 'apos_o_evento']))
+        ->assertSessionHasErrors('tipo_gatilho');
+
+    expect(Automacao::count())->toBe(0);
+});
+
+test('mostra o gatilho "após o pagamento" na listagem', function (int $minutosDisparo, string $esperado) {
+    Automacao::factory()->aposPagamento()->create(['minutos_disparo' => $minutosDisparo]);
+
+    $this->get(route('automacoes.index'))->assertSee($esperado);
+})->with([
+    'imediato' => [0, 'Logo após o pagamento'],
+    'com tempo' => [90, '1h 30min após o pagamento'],
 ]);
 
 test('mostra o formulário de criação com eventos e mensagens', function () {

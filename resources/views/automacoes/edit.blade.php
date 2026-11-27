@@ -26,4 +26,5 @@
 
 @push('scripts')
 <script src="{{ asset('assets/js/automacao-canal.js') }}"></script>
+<script src="{{ asset('assets/js/automacao-gatilho.js') }}"></script>
 @endpush

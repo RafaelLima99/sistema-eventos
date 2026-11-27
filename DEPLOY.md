@@ -58,7 +58,6 @@ docker compose exec app php artisan migrate
 | Serviço | URL |
 |---|---|
 | Aplicação | http://localhost:8000 |
-| Mailpit | http://localhost:8025 |
 | MySQL | `127.0.0.1:3306` (credenciais do `.env`) |
 
 Comandos comuns:

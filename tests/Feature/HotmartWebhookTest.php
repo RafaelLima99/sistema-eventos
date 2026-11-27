@@ -102,6 +102,33 @@ test('completa com os dados da compra a inscrição pendente que veio da Greatpa
         ->valor_pago->toBe('35.00');
 });
 
+test('guarda quando o pagamento foi aprovado e mantém a data se a Hotmart reenviar o webhook', function () {
+    // freezeSecond(): o banco guarda a data sem os milissegundos.
+    $this->freezeSecond();
+
+    enviarWebhook($this->evento, webhookHotmart())->assertOk();
+    $pagoEm = Inscrito::firstOrFail()->pago_em;
+
+    $this->travel(10)->minutes();
+    enviarWebhook($this->evento, webhookHotmart())->assertOk();
+
+    expect($pagoEm->equalTo(now()->subMinutes(10)))->toBeTrue()
+        ->and(Inscrito::firstOrFail()->pago_em->equalTo($pagoEm))->toBeTrue();
+});
+
+test('guarda a data do pagamento na inscrição pendente que veio da Greatpages', function () {
+    // freezeSecond(): o banco guarda a data sem os milissegundos.
+    $this->freezeSecond();
+    $inscrito = Inscrito::factory()->create([
+        'evento_id' => $this->evento->id,
+        'contato_id' => Contato::factory()->create(['cpf' => '31204827111'])->id,
+    ]);
+
+    enviarWebhook($this->evento, webhookHotmart())->assertOk();
+
+    expect($inscrito->refresh()->pago_em->equalTo(now()))->toBeTrue();
+});
+
 test('não duplica a inscrição quando a Hotmart reenvia o mesmo webhook', function () {
     enviarWebhook($this->evento, webhookHotmart())->assertOk();
     enviarWebhook($this->evento, webhookHotmart())->assertOk();

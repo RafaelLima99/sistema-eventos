@@ -36,9 +36,20 @@
         <div class="card-pad">
             {{-- O banco guarda o total em minutos; na edição, ele é dividido de volta em horas e minutos (90 => 1h 30min). --}}
             @php($totalDeMinutos = $automacao->minutos_disparo ?? 0)
-            <label class="form-label">Tempo após a inscrição</label>
             <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Contar o tempo a partir de</label>
+                    <select name="tipo_gatilho" class="form-select @error('tipo_gatilho') is-invalid @enderror">
+                        @foreach (\App\Enums\TipoGatilho::cases() as $gatilho)
+                            <option value="{{ $gatilho->value }}" @selected(old('tipo_gatilho', $automacao->tipo_gatilho->value ?? null) === $gatilho->value)>{{ $gatilho->label() }}</option>
+                        @endforeach
+                    </select>
+                    @error('tipo_gatilho')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
                 <div class="col-6 col-md-2">
+                    <label class="form-label">Horas</label>
                     <div class="input-group">
                         <input name="horas" type="number" min="0" value="{{ old('horas', intdiv($totalDeMinutos, 60)) }}" class="form-control @error('horas') is-invalid @enderror">
                         <span class="input-group-text">h</span>
@@ -48,6 +59,7 @@
                     @enderror
                 </div>
                 <div class="col-6 col-md-2">
+                    <label class="form-label">Minutos</label>
                     <div class="input-group">
                         <input name="minutos" type="number" min="0" max="59" value="{{ old('minutos', $totalDeMinutos % 60) }}" class="form-control @error('minutos') is-invalid @enderror">
                         <span class="input-group-text">min</span>
@@ -57,11 +69,12 @@
                     @enderror
                 </div>
             </div>
-            <div class="form-hint">Ex.: 1 h e 30 min dispara 1h30 depois. Deixe 0 h e 0 min para disparo imediato.</div>
+            <div class="form-hint">Ex.: 1 h e 30 min dispara 1h30 depois. Deixe 0 h e 0 min para disparo imediato (logo após a inscrição ou o pagamento).</div>
         </div>
     </div>
 
-    <div class="card">
+    {{-- Escondido pelo JavaScript (automacao-gatilho.js) quando o gatilho é "Após o pagamento": aí o público é sempre quem pagou. --}}
+    <div class="card card-publico">
         <div class="card-head"><h3>Público</h3></div>
         <div class="card-pad">
             <div class="row g-3">

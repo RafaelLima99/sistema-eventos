@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Enums\CanalMensagem;
+use App\Enums\FiltroPublico;
+use App\Enums\TipoGatilho;
 
 /**
  * Regras de como as automações são guardadas no banco.
@@ -30,6 +32,9 @@ class AutomacaoService
             // WhatsApp antiga continuaria ligada à automação (e não daria para removê-la depois).
             'whatsapp_mensagem_id' => $canalEscolhido === CanalMensagem::Whatsapp ? ($dados['whatsapp_mensagem_id'] ?? null) : null,
             'email_mensagem_id' => $canalEscolhido === CanalMensagem::Email ? ($dados['email_mensagem_id'] ?? null) : null,
+
+            // "Após o pagamento" vale só para quem pagou: o campo Público fica escondido na tela e é fixado aqui.
+            'filtro' => TipoGatilho::from($dados['tipo_gatilho']) === TipoGatilho::AposPagamento ? FiltroPublico::Pagantes->value : $dados['filtro'],
         ];
     }
 }

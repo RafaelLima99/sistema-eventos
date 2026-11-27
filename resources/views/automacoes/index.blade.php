@@ -51,10 +51,12 @@
                         @php($horas = intdiv($automacao->minutos_disparo, 60))
                         @php($minutos = $automacao->minutos_disparo % 60)
                         <div class="comm-msg">
+                            {{-- "após a inscrição" ou "após o pagamento". --}}
+                            @php($gatilho = Str::lower($automacao->tipo_gatilho->label()))
                             @if ($automacao->minutos_disparo === 0)
-                                Logo após a inscrição
+                                Logo {{ $gatilho }}
                             @else
-                                {{ $horas > 0 ? $horas.'h' : '' }} {{ $minutos > 0 ? $minutos.'min' : '' }} após a inscrição
+                                {{ $horas > 0 ? $horas.'h' : '' }} {{ $minutos > 0 ? $minutos.'min' : '' }} {{ $gatilho }}
                             @endif
                         </div>
                     </div>

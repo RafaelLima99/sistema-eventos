@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\StatusIngresso;
+use App\Enums\TipoGatilho;
 use App\Models\Contato;
 use App\Models\Evento;
 use App\Models\Inscrito;
@@ -21,7 +22,7 @@ class HotmartWebhookService
     /**
      * Cria (ou atualiza) o contato do comprador e o inscreve no evento.
      *
-     * Se o contato já está inscrito no evento (ex.: pelo formulário da Greatpages), a inscrição
+     * Se o contato já está inscrito no evento (ex.: pelo formulário da landing page), a inscrição
      * é completada com os dados da compra. Isso também evita duplicar quando a Hotmart reenvia o webhook.
      *
      * @param  array<string, mixed>  $dados  conteúdo de "data" do webhook
@@ -30,7 +31,7 @@ class HotmartWebhookService
     {
         $contato = $this->criarOuAtualizarContato($dados['buyer']);
 
-        // O tipo de ingresso não vem da Hotmart: ele é definido pelo formulário da Greatpages.
+        // O tipo de ingresso não vem da Hotmart: ele é definido pelo formulário da landing page.
         $dadosDaCompra = [
             'status_ingresso' => StatusIngresso::Pago,
             'quantidade_ingresso' => data_get($dados, 'purchase.event_tickets.amount') ?? 1,
@@ -43,7 +44,13 @@ class HotmartWebhookService
 
         // Se o contato já está inscrito no evento, completa a inscrição com os dados da compra.
         if ($inscrito) {
+            // Guarda quando pagou. Se a Hotmart reenviar o webhook, mantém a data do primeiro aviso.
+            $inscrito->pago_em ??= now();
             $inscrito->update($dadosDaCompra);
+
+            // Acabou de pagar: envia as mensagens das automações "Logo após o pagamento" deste evento, se houver.
+            // As "Logo após a inscrição" ele já recebeu quando se inscreveu pela landing page.
+            $this->automacaoEnvioService->enviarMensagensImediatasSeHouver($inscrito, TipoGatilho::AposPagamento);
 
             return $inscrito;
         }
@@ -52,16 +59,17 @@ class HotmartWebhookService
             'evento_id' => $evento->id,
             'contato_id' => $contato->id,
             'plataforma' => 'hotmart',
-            // Comprou direto pela Hotmart, sem passar pelo formulário da Greatpages.
+            // Comprou direto pela Hotmart, sem passar pelo formulário da landing page.
             'tipo_ingresso' => null,
+            'pago_em' => now(),
             ...$dadosDaCompra,
         ]);
 
-        // Só chega aqui quem comprou direto na Hotmart, sem passar antes pelo formulário da Greatpages:
-        // a inscrição acabou de ser criada agora. Por isso envia as mensagens das automações
-        // "Logo após a inscrição" deste evento, se houver.
-        // Quem já tinha se inscrito pela Greatpages não recebe de novo: o if lá em cima só atualiza e sai.
-        $this->automacaoEnvioService->enviarMensagensImediatasSeHouver($inscrito);
+        // Só chega aqui quem comprou direto na Hotmart, sem passar antes pelo formulário da landing page:
+        // a inscrição e o pagamento aconteceram agora, juntos. Por isso envia as mensagens das automações
+        // "Logo após a inscrição" e "Logo após o pagamento" deste evento, se houver.
+        $this->automacaoEnvioService->enviarMensagensImediatasSeHouver($inscrito, TipoGatilho::AposInscricao);
+        $this->automacaoEnvioService->enviarMensagensImediatasSeHouver($inscrito, TipoGatilho::AposPagamento);
 
         return $inscrito;
     }
